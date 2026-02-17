@@ -49,6 +49,20 @@ npm run preview
 - `npm run preview` - Preview the production build
 - `npm run lint` - Run ESLint
 
+## Git Commands
+
+```bash
+git add --all
+git commit -m ""
+git push origin
+```
+
+```bash
+git fetch origin
+git merge origin/master
+git push origin
+```
+
 ## Project Status
 
 This is an active frontend project and is still evolving.
