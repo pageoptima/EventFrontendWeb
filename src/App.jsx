@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "./router";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      {" "}
-      <h1 className=" text-9xl font-bold underline ">Hello world!</h1>
-    </>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   );
 }
 
