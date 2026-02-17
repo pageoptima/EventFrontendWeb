@@ -14,6 +14,7 @@ Events is a social events platform where people can share upcoming events, post 
 - React
 - Vite
 - Tailwind CSS
+- shadcn/ui
 - ESLint
 
 ## Getting Started
@@ -48,6 +49,20 @@ npm run preview
 - `npm run build` - Build for production
 - `npm run preview` - Preview the production build
 - `npm run lint` - Run ESLint
+
+## Git Commands
+
+```bash
+git add --all
+git commit -m ""
+git push origin
+```
+
+```bash
+git fetch origin
+git merge origin/master
+git push origin
+```
 
 ## Project Status
 
