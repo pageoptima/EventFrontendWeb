@@ -14,6 +14,7 @@ Events is a social events platform where people can share upcoming events, post 
 - React
 - Vite
 - Tailwind CSS
+- shadcn/ui
 - ESLint
 
 ## Getting Started
