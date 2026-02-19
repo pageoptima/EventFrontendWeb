@@ -2,12 +2,12 @@ import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import eventIcon from "@/assets/icons/event.svg";
 import plusIcon from "@/assets/icons/plus-black.svg";
-import AppButton from "@/components/AppButton";
+import AppButton from "@/components/common/AppButton";
 import { sidebarMainItems } from "@/config/sidebar";
 
 function Sidebar() {
   return (
-    <aside className="w-64 shrink-0 text-white bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)]">
+    <aside className="fixed left-0 top-0 h-screen w-64 shrink-0 overflow-y-auto text-white bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)]">
       <div className="px-6 py-6 text-lg font-semibold flex items-center gap-3">
         <img src={eventIcon} alt="" className="h-8 w-8" />
         <span>Event</span>

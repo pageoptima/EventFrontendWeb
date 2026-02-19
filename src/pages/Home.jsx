@@ -1,13 +1,20 @@
+import FeedPost from "@/components/FeedPost";
 import RightSidebar from "@/components/RightSidebar";
+import StoriesSection from "@/components/StoriesSection";
+import { feedPosts } from "@/config/posts";
+import { profiles } from "@/config/profiles";
 
 function Home() {
+  const stories = profiles.slice(0, 8);
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <section className="space-y-2">
-        <h1 className="text-2xl font-semibold">Home</h1>
-        <p className="text-muted-foreground">
-          Home feed placeholder (stories + posts).
-        </p>
+      <section className="space-y-6">
+        <StoriesSection profiles={stories} />
+        <section className="space-y-6">
+          {feedPosts.map((post) => (
+            <FeedPost key={post.id} post={post} />
+          ))}
+        </section>
       </section>
       <RightSidebar />
     </div>

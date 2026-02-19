@@ -45,6 +45,17 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@layer utilities {
+    .no-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+
 :root {
     --radius: 0.625rem;
     --background: oklch(1 0 0);
