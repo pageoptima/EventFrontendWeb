@@ -1,7 +1,7 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "../components/ProtectedRoute";
-import AppLayout from "../layouts/AppLayout";
-import AuthLayout from "../layouts/AuthLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import AppLayout from "@/layouts/AppLayout";
+import AuthLayout from "@/layouts/AuthLayout";
 import {
   Chats,
   CreateEvent,
@@ -14,7 +14,7 @@ import {
   Search,
   Settings,
   Teaser,
-} from "../pages";
+} from "@/pages";
 
 const router = createBrowserRouter([
   {
