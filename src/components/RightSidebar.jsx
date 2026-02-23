@@ -1,18 +1,25 @@
+import EventSuggestions from "@/components/EventSuggestions";
+import FollowSuggestions from "@/components/FollowSuggestions";
+import { events } from "@/config/events";
+import { profiles } from "@/config/profiles";
+
+const followSuggestions = profiles.slice(0, 3);
+const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+const eventSuggestions = events.map((event) => ({
+  ...event,
+  user: profilesById.get(event.userId) ?? {
+    id: event.userId,
+    username: event.userId.replace("user-", "user_id"),
+    name: event.userId,
+    image: "",
+  },
+}));
+
 function RightSidebar() {
   return (
-    <aside className="space-y-4">
-      <section className="rounded-lg border border-border p-4">
-        <h2 className="text-sm font-semibold">Follow Suggestions</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Suggestions placeholder.
-        </p>
-      </section>
-      <section className="rounded-lg border border-border p-4">
-        <h2 className="text-sm font-semibold">Upcoming Events</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Upcoming events placeholder.
-        </p>
-      </section>
+    <aside className="no-scrollbar space-y-4 lg:fixed lg:top-0 lg:right-6 lg:h-screen lg:w-[252px] lg:pt-6 lg:pb-6 lg:overflow-y-auto lg:overflow-x-hidden">
+      <FollowSuggestions profiles={followSuggestions} />
+      <EventSuggestions events={eventSuggestions} />
     </aside>
   );
 }
