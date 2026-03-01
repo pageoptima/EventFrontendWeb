@@ -17,7 +17,7 @@ const eventSuggestions = events.map((event) => ({
 
 function RightSidebar() {
   return (
-    <aside className="no-scrollbar space-y-4 lg:fixed lg:top-0 lg:right-6 lg:h-screen lg:w-[252px] lg:pt-6 lg:pb-6 lg:overflow-y-auto lg:overflow-x-hidden">
+    <aside className="no-scrollbar space-y-4 lg:fixed lg:top-0 lg:right-6 lg:h-screen lg:w-63 lg:pt-6 lg:pb-6 lg:overflow-y-auto lg:overflow-x-hidden xl:w-[313px]">
       <FollowSuggestions profiles={followSuggestions} />
       <EventSuggestions events={eventSuggestions} />
     </aside>

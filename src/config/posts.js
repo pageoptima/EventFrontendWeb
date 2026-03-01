@@ -68,6 +68,24 @@ const commentCounts = [
   "240",
 ];
 
+const viewCounts = [
+  "52k",
+  "38.4k",
+  "27.9k",
+  "44.1k",
+  "19.6k",
+  "61.2k",
+  "15.3k",
+  "72.8k",
+  "33.7k",
+  "22.5k",
+  "48.9k",
+  "29.4k",
+  "36.1k",
+  "14.8k",
+  "41.6k",
+];
+
 export const feedPosts = postImages.map((image, index) => {
   const userId = String(index + 1).padStart(3, "0");
   return {
@@ -79,5 +97,6 @@ export const feedPosts = postImages.map((image, index) => {
     },
     likes: likeCounts[index % likeCounts.length],
     comments: commentCounts[index % commentCounts.length],
+    views: viewCounts[index % viewCounts.length],
   };
 });
