@@ -22,8 +22,10 @@ function FeedPost({ post }) {
             <p className="text-xs text-muted-foreground">{post.user.handle}</p>
           </div>
         </div>
-        <AppButton className="h-8 rounded-full bg-[linear-gradient(90deg,#B839F1_0%,#FF2727_100%)] px-4 text-xs font-semibold text-white shadow-sm hover:opacity-90">
-          Follow
+        <AppButton className="h-[34px] w-[110px] cursor-pointer rounded-[6px] bg-[linear-gradient(90deg,#B839F1_0%,#FF2727_100%)] px-0 text-xs font-semibold text-white shadow-sm hover:opacity-90 sm:h-[38px] sm:w-[126px]">
+          <span className="inline-flex h-[15px] w-[87px] items-center justify-center">
+            Follow
+          </span>
         </AppButton>
       </header>
       <div className="px-4 pb-4">

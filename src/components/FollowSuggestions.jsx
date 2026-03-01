@@ -4,7 +4,7 @@ function FollowSuggestion({ profile }) {
   return (
     <li className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-[linear-gradient(135deg,#B839F1_0%,#FF2727_100%)] p-[2px]">
+        <div className="h-[31px] w-[31px] rounded-full bg-[linear-gradient(135deg,#B839F1_0%,#FF2727_100%)] p-[2px]">
           <img
             src={profile.image}
             alt={profile.name}
@@ -21,8 +21,10 @@ function FollowSuggestion({ profile }) {
           </p>
         </div>
       </div>
-      <AppButton className="h-[21px] w-[91px] rounded-full bg-[linear-gradient(90deg,#B839F1_0%,#FF2727_100%)] px-2 text-[12px] font-semibold leading-none text-white shadow-sm hover:opacity-90">
-        Follow
+      <AppButton className="h-[26px] w-[88px] cursor-pointer rounded-[47px] bg-[linear-gradient(90deg,#B839F1_0%,#FF2727_100%)] px-0 text-[12px] font-semibold leading-none text-white shadow-sm hover:opacity-90">
+        <span className="inline-flex h-[15px] w-[87px] items-center justify-center">
+          Follow
+        </span>
       </AppButton>
     </li>
   );
@@ -30,7 +32,7 @@ function FollowSuggestion({ profile }) {
 
 function FollowSuggestions({ profiles }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-3">
+    <section className="rounded-2xl p-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">You might like</h2>
       </div>
