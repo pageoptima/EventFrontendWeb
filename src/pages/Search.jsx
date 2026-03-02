@@ -71,7 +71,6 @@ function Search() {
 
         {query && filteredEvents.length > 0 && (
           <div className="mb-4">
-            <h3 className="mb-2 text-sm font-semibold">Events</h3>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 mb-4">
               {filteredEvents.map((ev) => (
                 <div
