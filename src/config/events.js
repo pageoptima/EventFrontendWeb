@@ -11,6 +11,8 @@ export const events = [
   {
     id: "event-1",
     userId: "user-001",
+    name: "Sunset Flight Meetup",
+    place: "Rooftop Lounge, NYC",
     startDateTime: "2026-03-04T19:00:00",
     likes: "2.4k",
     image: event1,
@@ -18,6 +20,8 @@ export const events = [
   {
     id: "event-2",
     userId: "user-002",
+    name: "Live Stage Nights",
+    place: "The Arena, LA",
     startDateTime: "2026-03-07T18:30:00",
     likes: "1.7k",
     image: event2,
@@ -25,6 +29,8 @@ export const events = [
   {
     id: "event-3",
     userId: "user-003",
+    name: "Festival Confetti",
+    place: "Green Park, SF",
     startDateTime: "2026-03-10T20:00:00",
     likes: "3.1k",
     image: event3,
@@ -32,6 +38,8 @@ export const events = [
   {
     id: "event-4",
     userId: "user-004",
+    name: "Neon Dance Party",
+    place: "Pulse Club, Miami",
     startDateTime: "2026-03-14T17:30:00",
     likes: "2.9k",
     image: event4,
@@ -39,6 +47,8 @@ export const events = [
   {
     id: "event-5",
     userId: "user-005",
+    name: "Color Lights Gala",
+    place: "Grand Hall, Chicago",
     startDateTime: "2026-03-18T19:30:00",
     likes: "4.2k",
     image: event5,
@@ -46,6 +56,8 @@ export const events = [
   {
     id: "event-6",
     userId: "user-006",
+    name: "City Skyline Tour",
+    place: "Heliport, NYC",
     startDateTime: "2026-03-22T18:00:00",
     likes: "2.2k",
     image: event6,
@@ -53,6 +65,8 @@ export const events = [
   {
     id: "event-7",
     userId: "user-007",
+    name: "Blue Portrait Night",
+    place: "Studio 7, Austin",
     startDateTime: "2026-03-26T16:00:00",
     likes: "1.9k",
     image: event7,
@@ -60,6 +74,8 @@ export const events = [
   {
     id: "event-8",
     userId: "user-008",
+    name: "Acoustic Purple",
+    place: "Kolkata, India",
     startDateTime: "2026-03-30T19:15:00",
     likes: "3.7k",
     image: event8,

@@ -86,6 +86,24 @@ const viewCounts = [
   "41.6k",
 ];
 
+const descriptions = [
+  "Sunset flight views and travel inspo.",
+  "Live stage moments from last weekend's concert.",
+  "Crowd energy and confetti at the festival.",
+  "Neon lights and dance floor highlights.",
+  "Abstract color study captured at a set.",
+  "City skyline from a high vantage point.",
+  "Portrait from the blue-lit photo booth.",
+  "Vocal performance captured mid-verse.",
+  "Rooftop gathering and skyline vibes.",
+  "Acoustic set with intimate crowd.",
+  "Behind-the-scenes of the event setup.",
+  "Crowd reaction during the chorus.",
+  "Street-level city exploration photos.",
+  "Indie artist promo shot.",
+  "Candid moment from last night's show.",
+];
+
 export const feedPosts = postImages.map((image, index) => {
   const userId = String(index + 1).padStart(3, "0");
   return {
@@ -95,6 +113,7 @@ export const feedPosts = postImages.map((image, index) => {
       name: `user_id${userId}`,
       handle: `@user_id${userId}`,
     },
+    description: descriptions[index % descriptions.length],
     likes: likeCounts[index % likeCounts.length],
     comments: commentCounts[index % commentCounts.length],
     views: viewCounts[index % viewCounts.length],
