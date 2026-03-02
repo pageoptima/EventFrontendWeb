@@ -87,8 +87,8 @@ const viewCounts = [
 ];
 
 const descriptions = [
-  "Sunset flight views and travel inspo.",
-  "Live stage moments from last weekend's concert.",
+  "Sunset flight views and travel inspo Kolkata.",
+  "Live stage moments from last weekend's India concert.",
   "Crowd energy and confetti at the festival.",
   "Neon lights and dance floor highlights.",
   "Abstract color study captured at a set.",
