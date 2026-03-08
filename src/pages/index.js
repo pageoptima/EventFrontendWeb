@@ -2,7 +2,6 @@ export { default as Home } from "@/pages/Home.jsx";
 export { default as Search } from "@/pages/Search.jsx";
 export { default as Teaser } from "@/pages/Teaser.jsx";
 export { default as Chats } from "@/pages/Chats.jsx";
-export { default as Notifications } from "@/pages/Notifications.jsx";
 export { default as Profile } from "@/pages/Profile.jsx";
 export { default as CreateEvent } from "@/pages/CreateEvent.jsx";
 export { default as Settings } from "@/pages/Settings.jsx";
