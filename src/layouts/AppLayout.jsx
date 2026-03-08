@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
+import NotificationsLayer from "@/components/notifications/NotificationsLayer";
 
 function AppLayout() {
   return (
@@ -8,6 +9,7 @@ function AppLayout() {
       <main className="flex-1 p-6 ml-64">
         <Outlet />
       </main>
+      <NotificationsLayer />
     </div>
   );
 }
