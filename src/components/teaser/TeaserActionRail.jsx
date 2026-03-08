@@ -2,73 +2,49 @@ import {
   Bookmark,
   Heart,
   MessageCircle,
+  Share2,
   Volume2,
   VolumeX,
 } from "lucide-react";
-import shareIcon from "@/assets/icons/share.svg";
-import { Button } from "@/components/ui/button";
+import TeaserActionButton from "@/components/teaser/TeaserActionButton";
 
-const baseButtonClass =
-  "h-auto w-auto cursor-pointer p-0 text-foreground hover:bg-transparent hover:text-foreground";
+const iconClassName = "h-7 w-7";
 
 function TeaserActionRail({ teaser, isMuted, onToggleAudio }) {
   return (
     <div className="flex flex-col items-center gap-4 text-foreground">
-      <Button
-        type="button"
-        variant="ghost"
+      <TeaserActionButton
         aria-label={`${teaser.likes} likes`}
-        className={`${baseButtonClass} flex-col gap-1`}
+        count={teaser.likes}
       >
-        <Heart className="h-7 w-7" strokeWidth={1.8} />
-        <span className="text-base font-medium leading-none sm:text-lg">
-          {teaser.likes}
-        </span>
-      </Button>
+        <Heart className={iconClassName} strokeWidth={1.8} />
+      </TeaserActionButton>
 
-      <Button
-        type="button"
-        variant="ghost"
+      <TeaserActionButton
         onClick={onToggleAudio}
         aria-label={isMuted ? "Unmute teaser" : "Mute teaser"}
-        className={baseButtonClass}
       >
         {isMuted ? (
-          <VolumeX className="h-6 w-6" strokeWidth={1.8} />
+          <VolumeX className={iconClassName} strokeWidth={1.8} />
         ) : (
-          <Volume2 className="h-6 w-6" strokeWidth={1.8} />
+          <Volume2 className={iconClassName} strokeWidth={1.8} />
         )}
-      </Button>
+      </TeaserActionButton>
 
-      <Button
-        type="button"
-        variant="ghost"
+      <TeaserActionButton
         aria-label={`${teaser.comments} comments`}
-        className={`${baseButtonClass} flex-col gap-1`}
+        count={teaser.comments}
       >
-        <MessageCircle className="h-7 w-7 -scale-x-100" strokeWidth={1.8} />
-        <span className="text-base font-medium leading-none sm:text-lg">
-          {teaser.comments}
-        </span>
-      </Button>
+        <MessageCircle className={`${iconClassName} -scale-x-100`} strokeWidth={1.8} />
+      </TeaserActionButton>
 
-      <Button
-        type="button"
-        variant="ghost"
-        aria-label="Share teaser"
-        className={baseButtonClass}
-      >
-        <img src={shareIcon} alt="" className="h-7 w-7" />
-      </Button>
+      <TeaserActionButton aria-label="Share teaser">
+        <Share2 className={iconClassName} strokeWidth={1.8} />
+      </TeaserActionButton>
 
-      <Button
-        type="button"
-        variant="ghost"
-        aria-label="Save teaser"
-        className={`${baseButtonClass} mt-10`}
-      >
-        <Bookmark className="h-7 w-7" strokeWidth={1.8} />
-      </Button>
+      <TeaserActionButton aria-label="Save teaser" className="mt-10">
+        <Bookmark className={iconClassName} strokeWidth={1.8} />
+      </TeaserActionButton>
     </div>
   );
 }
