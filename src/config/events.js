@@ -12,7 +12,7 @@ export const events = [
     id: "event-1",
     userId: "user-001",
     name: "Sunset Flight Meetup",
-    place: "Rooftop Lounge, NYC",
+    place: "Rooftop YC",
     startDateTime: "2026-03-04T19:00:00",
     likes: "2.4k",
     image: event1,
