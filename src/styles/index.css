@@ -45,6 +45,15 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@layer base {
+    button {
+        cursor: pointer;
+    }
+    button:disabled {
+        cursor: not-allowed;
+    }
+}
+
 @layer utilities {
     .no-scrollbar {
         scrollbar-width: none;

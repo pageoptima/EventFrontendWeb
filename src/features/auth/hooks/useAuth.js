@@ -1,5 +1,13 @@
+import { useSelector } from "react-redux";
+import {
+  selectCurrentUser,
+  selectIsAuthenticated,
+} from "@/stores/slices/authSlice";
+
 function useAuth() {
-  return { isAuthenticated: true };
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  return { isAuthenticated, user };
 }
 
 export { useAuth };

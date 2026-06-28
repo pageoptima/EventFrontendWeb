@@ -1,5 +1,6 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "@/app/router/ProtectedRoute";
+import PublicRoute from "@/app/router/PublicRoute";
 import AppLayout from "@/app/layouts/AppLayout";
 import AuthLayout from "@/app/layouts/AuthLayout";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/features";
 
 const router = createBrowserRouter([
+  // Protected — authenticated users only
   {
     element: <ProtectedRoute />,
     children: [
@@ -34,13 +36,19 @@ const router = createBrowserRouter([
       },
     ],
   },
+  // Public — unauthenticated users only (redirects away if already logged in)
   {
-    path: "auth",
-    element: <AuthLayout />,
+    element: <PublicRoute />,
     children: [
-      { index: true, element: <Navigate to="login" replace /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
+      {
+        path: "auth",
+        element: <AuthLayout />,
+        children: [
+          { index: true, element: <Navigate to="login" replace /> },
+          { path: "login", element: <Login /> },
+          { path: "register", element: <Register /> },
+        ],
+      },
     ],
   },
 ]);
