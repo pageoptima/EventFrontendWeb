@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
 import { setCredentials } from "@/stores/slices/authSlice";
 import { login } from "@/features/auth/services/authService";
 import { VALIDATION } from "@/shared/utils/constants";
@@ -23,9 +22,6 @@ function validate({ email, password }) {
 
 export function useLoginForm() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname ?? "/";
 
   const [fields, setFields] = useState(INITIAL_FIELDS);
   const [fieldErrors, setFieldErrors] = useState(INITIAL_ERRORS);
@@ -34,7 +30,6 @@ export function useLoginForm() {
 
   const handleChange = ({ target: { name, value } }) => {
     setFields((prev) => ({ ...prev, [name]: value }));
-    // Clear the field error as the user corrects it
     if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     if (apiError) setApiError("");
   };
@@ -54,8 +49,10 @@ export function useLoginForm() {
         email: fields.email.trim(),
         password: fields.password,
       });
+      // Dispatch only — PublicRoute detects isAuthenticated=true and
+      // redirects to location.state.from (or "/") declaratively.
+      // Calling navigate() here as well causes a double-navigation race.
       dispatch(setCredentials({ accessToken, user: null }));
-      navigate(from, { replace: true });
     } catch (err) {
       setApiError(getApiErrorMessage(err));
     } finally {

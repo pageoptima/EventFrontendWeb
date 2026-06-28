@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { setCredentials } from "@/stores/slices/authSlice";
 import { register } from "@/features/auth/services/authService";
 import { VALIDATION } from "@/shared/utils/constants";
@@ -30,7 +29,6 @@ function validate({ name, email, password }) {
 
 export function useRegisterForm() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [fields, setFields] = useState(INITIAL_FIELDS);
   const [fieldErrors, setFieldErrors] = useState(INITIAL_ERRORS);
@@ -59,8 +57,9 @@ export function useRegisterForm() {
         email: fields.email.trim(),
         password: fields.password,
       });
+      // Dispatch only — PublicRoute detects isAuthenticated=true and
+      // redirects to location.state.from (or "/") declaratively.
       dispatch(setCredentials({ accessToken, user: null }));
-      navigate("/", { replace: true });
     } catch (err) {
       setApiError(getApiErrorMessage(err));
     } finally {

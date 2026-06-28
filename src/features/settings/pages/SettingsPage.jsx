@@ -1,15 +1,14 @@
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { clearCredentials } from "@/stores/slices/authSlice";
 
 function SettingsPage() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
+  // ProtectedRoute detects isAuthenticated=false after dispatch and handles
+  // the redirect to /auth/login — no need to navigate() here as well.
   const handleLogout = () => {
     dispatch(clearCredentials());
-    navigate("/auth/login", { replace: true });
   };
 
   return (
