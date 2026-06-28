@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { notifications as notificationsData } from "@/app/config/notifications";
 import { profiles } from "@/app/config/profiles";
 
@@ -10,9 +11,10 @@ function NotificationItem({ notification }) {
 
   return (
     <li
-      className={`relative rounded-2xl px-4 py-3 transition ${
-        notification.highlighted ? "bg-white text-slate-900" : "text-white"
-      }`}
+      className={cn(
+        "relative rounded-2xl px-4 py-3 transition",
+        notification.highlighted ? "bg-white text-slate-900" : "text-white",
+      )}
     >
       {notification.unread ? (
         <span
@@ -38,9 +40,10 @@ function NotificationItem({ notification }) {
 
         <button
           type="button"
-          className={`shrink-0 text-sm font-semibold ${
-            notification.highlighted ? "text-[#0B6CFF]" : "text-white"
-          }`}
+          className={cn(
+            "shrink-0 text-sm font-semibold",
+            notification.highlighted ? "text-[#0B6CFF]" : "text-white",
+          )}
         >
           {notification.actionLabel}
         </button>
@@ -49,11 +52,20 @@ function NotificationItem({ notification }) {
   );
 }
 
-function NotificationsPanel({ id, className = "" }) {
+function NotificationsPanel({ id, className }) {
   return (
     <aside
       id={id}
-      className={`fixed left-[9.75rem] top-44 z-40 w-[345px] rounded-2xl bg-[linear-gradient(180deg,#071757_0%,#03020D_100%)] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.5)] ${className}`}
+      className={cn(
+        "fixed z-40 rounded-2xl bg-[linear-gradient(180deg,#071757_0%,#03020D_100%)] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.5)]",
+        // Mobile: above the bottom nav, full width with side margins
+        "bottom-20 inset-x-3",
+        // Tablet: next to icon sidebar (64px = md:left-16), anchor below header
+        "md:bottom-auto md:inset-x-auto md:left-20 md:top-28 md:w-[345px]",
+        // Desktop: original pop-out from sidebar position
+        "lg:left-[9.75rem] lg:top-44",
+        className,
+      )}
       role="dialog"
       aria-label="Notifications"
       aria-modal="false"

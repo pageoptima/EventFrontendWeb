@@ -132,10 +132,10 @@ function TeaserSlide({ teaser, profile, shouldPreload = false }) {
   return (
     <div
       ref={slideRef}
-      className="snap-start flex h-[calc(100vh-3rem)] items-center justify-center px-4"
+      className="snap-start flex h-[calc(100vh-6rem)] md:h-[calc(100vh-3rem)] items-center justify-center px-2 sm:px-4"
     >
       <div className="flex items-center gap-4 sm:gap-6">
-        <article className="relative h-[78vh] min-h-[520px] max-h-[720px] aspect-[9/16] overflow-hidden rounded-[14px] bg-black shadow-xl">
+        <article className="relative h-[78vh] min-h-90 sm:min-h-120 max-h-180 aspect-9/16 overflow-hidden rounded-[14px] bg-black shadow-xl">
           <video
             ref={videoRef}
             src={shouldLoadVideo ? teaser.video : undefined}
