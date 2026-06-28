@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   accessToken: null,
-  user: null, // { id, name, email }
+  user: null, // { id, name, email, role } — decoded from JWT on login/register
 };
 
 const authSlice = createSlice({
