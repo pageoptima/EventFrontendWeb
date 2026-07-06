@@ -9,7 +9,7 @@ function ProfileSkeleton() {
           {/* Cover + Avatar */}
           <div className="relative h-48 sm:h-56">
             <div className="h-full w-full animate-pulse bg-muted" />
-            <div className="absolute -bottom-10 left-4 h-21 w-21 rounded-full bg-muted ring-4 ring-white animate-pulse sm:left-6 sm:h-31 sm:w-31" />
+            <div className="absolute -bottom-10 left-4 h-21 w-21 rounded-full bg-muted ring-4 ring-background animate-pulse sm:left-6 sm:h-31 sm:w-31" />
           </div>
 
           {/* Profile body */}

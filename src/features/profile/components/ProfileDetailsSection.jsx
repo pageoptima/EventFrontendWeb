@@ -18,7 +18,7 @@ function Avatar({ name, profilePicture, isOwn, uploading, onChangeClick }) {
 
   return (
     <div className="absolute -bottom-10 left-4 h-21 w-21 rounded-full bg-brand-gradient p-0.5 sm:left-6 sm:h-31 sm:w-31">
-      <div className="relative h-full w-full overflow-hidden rounded-full bg-white p-0.5">
+      <div className="relative h-full w-full overflow-hidden rounded-full bg-white dark:bg-background p-0.5">
         {profilePicture ? (
           <img
             src={profilePicture}
@@ -67,7 +67,7 @@ function RelationshipButton({
       <button
         type="button"
         disabled
-        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-destructive opacity-60 sm:h-9.5"
+        className="h-8.5 rounded-full border border-border bg-white dark:bg-card px-4 text-xs font-semibold text-destructive opacity-60 sm:h-9.5"
       >
         Blocked
       </button>
@@ -79,7 +79,7 @@ function RelationshipButton({
       <button
         type="button"
         onClick={onMessage}
-        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
+        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white dark:bg-card text-slate-700 dark:text-foreground transition hover:bg-slate-50 dark:hover:bg-muted sm:h-9.75 sm:w-9.75"
         aria-label="Message"
       >
         <Mail className="h-4 w-4" />
@@ -94,7 +94,7 @@ function RelationshipButton({
           type="button"
           onClick={() => onDeleteRequest?.(requestId)}
           disabled={isPending}
-          className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
+          className="h-8.5 rounded-full border border-border bg-white dark:bg-card px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
         >
           Decline
         </button>
@@ -120,7 +120,7 @@ function RelationshipButton({
         type="button"
         onClick={() => onDeleteRequest?.(requestId)}
         disabled={isPending}
-        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
+        className="h-8.5 rounded-full border border-border bg-white dark:bg-card px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
       >
         {isPending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -170,14 +170,14 @@ function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, onUnblock, 
       <button
         type="button"
         onClick={() => hasOptions && setOpen((v) => !v)}
-        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
+        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white dark:bg-card text-slate-700 dark:text-foreground transition hover:bg-slate-50 dark:hover:bg-muted sm:h-9.75 sm:w-9.75"
         aria-label="More options"
       >
         <MoreHorizontal className="h-4 w-4" />
       </button>
 
       {open && hasOptions && (
-        <div className="absolute right-0 top-full z-10 mt-1.5 w-40 overflow-hidden rounded-xl border border-border bg-white shadow-md">
+        <div className="absolute right-0 top-full z-10 mt-1.5 w-40 overflow-hidden rounded-xl border border-border bg-white dark:bg-card shadow-md">
           {showUnfriend && (
             <button
               type="button"
@@ -330,7 +330,7 @@ function ProfileDetailsSection({
               <button
                 type="button"
                 onClick={() => navigate("/settings")}
-                className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
+                className="h-8.5 rounded-full border border-border bg-white dark:bg-card px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
               >
                 Edit Profile
               </button>

@@ -5,7 +5,7 @@ import BottomNav from "@/app/layouts/BottomNav";
 
 function AppLayout() {
   return (
-    <div className="min-h-screen text-foreground bg-fixed bg-[linear-gradient(135deg,#F1E7FB_0%,#FFFFFF_75%)]">
+    <div className="min-h-screen text-foreground bg-fixed bg-[linear-gradient(135deg,#F1E7FB_0%,#FFFFFF_75%)] dark:bg-none dark:bg-background">
       <AppSidebar />
       {/*
         Mobile  (< md):  no sidebar   → full width,  p-4, pb-20 for bottom nav

@@ -26,11 +26,11 @@ function AuthPasswordField({
           className={cn(
             "w-full rounded-lg border bg-transparent px-3 py-2.5 pr-10 text-sm text-foreground",
             "placeholder:text-muted-foreground transition",
-            "focus:outline-none focus:ring-2 focus:ring-[#B839F1]/40",
+            "focus:outline-none focus:ring-2 focus:ring-[#B839F1]/40 dark:focus:ring-[#7F5AF0]/40",
             "disabled:cursor-not-allowed disabled:opacity-60",
             error
               ? "border-destructive"
-              : "border-border hover:border-[#B839F1]/50",
+              : "border-border hover:border-[#B839F1]/50 dark:hover:border-[#7F5AF0]/50",
           )}
           {...inputProps}
         />

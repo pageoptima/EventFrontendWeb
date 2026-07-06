@@ -97,7 +97,7 @@ function FriendsModal({ isOwn, profileUserId, onClose }) {
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[80vh]"
+        className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-white dark:bg-card shadow-2xl max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

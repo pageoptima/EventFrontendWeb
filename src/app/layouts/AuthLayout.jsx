@@ -32,7 +32,7 @@ function AuthLayout() {
   return (
     <div className="flex min-h-screen">
       {/* ── Left brand panel (tablet+) ── */}
-      <div className="hidden md:flex md:w-5/12 lg:w-1/2 flex-col items-center justify-center bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)] p-12 text-white">
+      <div className="hidden md:flex md:w-5/12 lg:w-1/2 flex-col items-center justify-center bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)] dark:bg-[linear-gradient(135deg,#0A0714_0%,#12101E_50%,#1a0533_100%)] p-12 text-white">
         <div className="max-w-xs w-full">
           {/* Brand mark */}
           <div className="mb-10 flex items-center gap-3">

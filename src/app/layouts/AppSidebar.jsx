@@ -28,7 +28,7 @@ function AppSidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-30 h-screen shrink-0 overflow-y-auto text-white",
-        "bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)]",
+        "bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)] dark:bg-none dark:bg-[#0A0714]",
         // Hidden on mobile, icon-only on tablet, full on desktop
         "hidden md:flex md:w-16 lg:w-64 flex-col",
       )}

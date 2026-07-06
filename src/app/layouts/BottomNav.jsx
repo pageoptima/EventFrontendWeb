@@ -15,7 +15,7 @@ const navItems = [
 const itemClass = (isActive) =>
   cn(
     "flex flex-col items-center justify-center gap-1 flex-1 py-2 min-w-0 transition-colors",
-    isActive ? "text-[#B839F1]" : "text-slate-400 hover:text-slate-600",
+    isActive ? "text-[#B839F1]" : "text-slate-400 hover:text-slate-600 dark:text-[#9C96B8] dark:hover:text-[#F4F2FA]",
   );
 
 function BottomNav() {
@@ -23,7 +23,7 @@ function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 flex items-center border-t border-border bg-white/95 backdrop-blur-sm md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 flex items-center border-t border-border bg-white/95 dark:bg-card/95 backdrop-blur-sm md:hidden"
       aria-label="Mobile navigation"
     >
       {navItems.map((item) =>

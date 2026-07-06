@@ -66,7 +66,7 @@ function LoginPage() {
         Don&apos;t have an account?{" "}
         <Link
           to="/auth/register"
-          className="font-semibold text-[#B839F1] transition hover:text-[#FF2727]"
+          className="font-semibold text-[#B839F1] dark:text-[#7F5AF0] transition hover:text-[#FF2727] dark:hover:text-[#2CB8E8]"
         >
           Create one
         </Link>

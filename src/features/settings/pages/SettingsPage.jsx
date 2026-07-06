@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Moon, Sun } from "lucide-react";
 import { clearCredentials } from "@/stores/slices/authSlice";
+import { toggleTheme, selectThemeMode } from "@/stores/slices/themeSlice";
 import { useBlockedUsers, useOutgoingRequests } from "@/features/friend/hooks/useFriendQueries";
 import { friendKeys } from "@/features/friend/queryKeys";
 import { unblockUser, deleteFriendRequest } from "@/features/friend/services/friendService";
@@ -86,6 +87,8 @@ function SentRequestItem({ request }) {
 
 function SettingsPage() {
   const dispatch = useDispatch();
+  const themeMode = useSelector(selectThemeMode);
+  const isDark = themeMode === "dark";
   const { data: blockedUsers = [], isLoading: blocklistLoading } = useBlockedUsers();
   const { data: outgoingRequests = [], isLoading: outgoingLoading } = useOutgoingRequests();
 
@@ -100,6 +103,40 @@ function SettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Manage your account preferences
         </p>
+      </div>
+
+      {/* Appearance */}
+      <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Appearance
+        </p>
+        <div className="flex items-center justify-between rounded-lg px-3 py-2.5">
+          <div className="flex items-center gap-3">
+            {isDark ? (
+              <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            ) : (
+              <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            )}
+            <span className="text-sm font-medium text-foreground">Dark mode</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isDark}
+            onClick={() => dispatch(toggleTheme())}
+            className={[
+              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isDark ? "bg-[#7F5AF0]" : "bg-border",
+            ].join(" ")}
+          >
+            <span
+              className={[
+                "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out",
+                isDark ? "translate-x-5" : "translate-x-0.5",
+              ].join(" ")}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4 space-y-1">

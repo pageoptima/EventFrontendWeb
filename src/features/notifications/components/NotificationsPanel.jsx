@@ -76,7 +76,7 @@ function FriendRequestItem({ request }) {
             type="button"
             onClick={() => accept.mutate()}
             disabled={isPending}
-            className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs font-semibold text-slate-900 transition hover:bg-white/90 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-muted px-3 py-1 text-xs font-semibold text-slate-900 dark:text-foreground transition hover:bg-white/90 dark:hover:bg-muted/80 disabled:opacity-60"
           >
             {accept.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Accept"}
           </button>

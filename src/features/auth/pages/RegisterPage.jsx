@@ -79,7 +79,7 @@ function RegisterPage() {
         Already have an account?{" "}
         <Link
           to="/auth/login"
-          className="font-semibold text-[#B839F1] transition hover:text-[#FF2727]"
+          className="font-semibold text-[#B839F1] dark:text-[#7F5AF0] transition hover:text-[#FF2727] dark:hover:text-[#2CB8E8]"
         >
           Sign in
         </Link>
