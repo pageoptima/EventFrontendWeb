@@ -5,10 +5,12 @@ import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsS
 import ProfilePostsSection from "@/features/profile/components/ProfilePostsSection";
 import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
 import { useUserProfile } from "@/features/profile/hooks/useProfile";
+import { useFriendActions } from "@/features/friend/hooks/useFriendActions";
 
 function UserProfilePage() {
   const { id } = useParams();
   const { data: profile, isLoading, error } = useUserProfile(id);
+  const actions = useFriendActions(id);
   const [activeTab, setActiveTab] = useState("events");
 
   if (isLoading) return <ProfileSkeleton />;
@@ -28,6 +30,8 @@ function UserProfilePage() {
     );
   }
 
+  const requestId = profile.relationship?.requestId ?? null;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_252px] xl:grid-cols-[minmax(0,1fr)_313px]">
       <section>
@@ -35,6 +39,12 @@ function UserProfilePage() {
           <ProfileDetailsSection
             profile={profile}
             isOwn={profile.isMe}
+            onAddFriend={actions.sendRequest}
+            onAcceptRequest={() => actions.acceptRequest(requestId)}
+            onDeleteRequest={() => actions.deleteRequest(requestId)}
+            onUnfriend={actions.unfriend}
+            onUnblock={actions.unblock}
+            friendActionPending={actions.isPending}
           />
           <ProfilePostsSection
             activeTab={activeTab}

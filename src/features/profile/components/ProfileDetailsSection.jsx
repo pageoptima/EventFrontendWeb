@@ -49,16 +49,28 @@ function Avatar({ name, profilePicture, isOwn, uploading, onChangeClick }) {
   );
 }
 
-function RelationshipButton({ relationship, onMessage }) {
-  const { isFriend, isBlocked, requestSent, requestReceived } = relationship ?? {};
+function RelationshipButton({
+  relationship,
+  onMessage,
+  onAddFriend,
+  onAcceptRequest,
+  onDeleteRequest,
+  onUnfriend,
+  onUnblock,
+  isPending,
+}) {
+  const { isFriend, isBlocked, requestSent, requestReceived, requestId } =
+    relationship ?? {};
 
   if (isBlocked) {
     return (
       <button
         type="button"
-        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-destructive transition hover:bg-destructive/10 sm:h-9.5"
+        onClick={onUnblock}
+        disabled={isPending}
+        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-destructive transition hover:bg-destructive/10 disabled:opacity-60 sm:h-9.5"
       >
-        Blocked
+        {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Blocked"}
       </button>
     );
   }
@@ -76,9 +88,11 @@ function RelationshipButton({ relationship, onMessage }) {
         </button>
         <button
           type="button"
-          className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
+          onClick={onUnfriend}
+          disabled={isPending}
+          className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
         >
-          Friends
+          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Friends"}
         </button>
       </>
     );
@@ -86,12 +100,28 @@ function RelationshipButton({ relationship, onMessage }) {
 
   if (requestReceived) {
     return (
-      <button
-        type="button"
-        className="h-8.5 rounded-full bg-brand-gradient-h px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 sm:h-9.5"
-      >
-        Accept Request
-      </button>
+      <>
+        <button
+          type="button"
+          onClick={() => onDeleteRequest?.(requestId)}
+          disabled={isPending}
+          className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
+        >
+          Decline
+        </button>
+        <button
+          type="button"
+          onClick={() => onAcceptRequest?.(requestId)}
+          disabled={isPending}
+          className="inline-flex h-8.5 items-center gap-1.5 rounded-full bg-brand-gradient-h px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60 sm:h-9.5"
+        >
+          {isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            "Accept Request"
+          )}
+        </button>
+      </>
     );
   }
 
@@ -99,9 +129,15 @@ function RelationshipButton({ relationship, onMessage }) {
     return (
       <button
         type="button"
-        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted sm:h-9.5"
+        onClick={() => onDeleteRequest?.(requestId)}
+        disabled={isPending}
+        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
       >
-        Request Sent
+        {isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          "Request Sent"
+        )}
       </button>
     );
   }
@@ -109,9 +145,15 @@ function RelationshipButton({ relationship, onMessage }) {
   return (
     <button
       type="button"
-      className="h-8.5 rounded-full bg-brand-gradient-h px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 sm:h-9.5"
+      onClick={onAddFriend}
+      disabled={isPending}
+      className="inline-flex h-8.5 items-center gap-1.5 rounded-full bg-brand-gradient-h px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60 sm:h-9.5"
     >
-      Add Friend
+      {isPending ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        "Add Friend"
+      )}
     </button>
   );
 }
@@ -126,6 +168,12 @@ function ProfileDetailsSection({
   uploadError = "",
   onMoreOptions,
   onMessage,
+  onAddFriend,
+  onAcceptRequest,
+  onDeleteRequest,
+  onUnfriend,
+  onUnblock,
+  friendActionPending = false,
 }) {
   const pictureInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -238,6 +286,12 @@ function ProfileDetailsSection({
               <RelationshipButton
                 relationship={relationship}
                 onMessage={onMessage}
+                onAddFriend={onAddFriend}
+                onAcceptRequest={onAcceptRequest}
+                onDeleteRequest={onDeleteRequest}
+                onUnfriend={onUnfriend}
+                onUnblock={onUnblock}
+                isPending={friendActionPending}
               />
             )}
           </div>
