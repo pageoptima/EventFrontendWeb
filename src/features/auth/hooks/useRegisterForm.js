@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/stores/slices/authSlice";
 import { register } from "@/features/auth/services/authService";
@@ -30,41 +31,42 @@ function validate({ name, email, password }) {
 
 export function useRegisterForm() {
   const dispatch = useDispatch();
-
   const [fields, setFields] = useState(INITIAL_FIELDS);
   const [fieldErrors, setFieldErrors] = useState(INITIAL_ERRORS);
-  const [apiError, setApiError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: register,
+    onSuccess: ({ accessToken }) => {
+      dispatch(setCredentials({ accessToken, user: decodeJwt(accessToken) }));
+    },
+  });
 
   const handleChange = ({ target: { name, value } }) => {
     setFields((prev) => ({ ...prev, [name]: value }));
     if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    if (apiError) setApiError("");
+    if (mutation.isError) mutation.reset();
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
     const errors = validate(fields);
     if (Object.keys(errors).length > 0) {
       setFieldErrors((prev) => ({ ...prev, ...errors }));
       return;
     }
-
-    setIsLoading(true);
-    try {
-      const { accessToken } = await register({
-        name: fields.name.trim(),
-        email: fields.email.trim(),
-        password: fields.password,
-      });
-      dispatch(setCredentials({ accessToken, user: decodeJwt(accessToken) }));
-    } catch (err) {
-      setApiError(getApiErrorMessage(err));
-    } finally {
-      setIsLoading(false);
-    }
+    mutation.mutate({
+      name: fields.name.trim(),
+      email: fields.email.trim(),
+      password: fields.password,
+    });
   };
 
-  return { fields, fieldErrors, apiError, isLoading, handleChange, handleSubmit };
+  return {
+    fields,
+    fieldErrors,
+    apiError: mutation.isError ? getApiErrorMessage(mutation.error) : "",
+    isLoading: mutation.isPending,
+    handleChange,
+    handleSubmit,
+  };
 }
