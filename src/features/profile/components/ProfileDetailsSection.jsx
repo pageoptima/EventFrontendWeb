@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Camera, Mail, MoreHorizontal, Loader2 } from "lucide-react";
+import FriendsModal from "@/features/profile/components/FriendsModal";
 
 const countFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
@@ -55,7 +56,6 @@ function RelationshipButton({
   onAddFriend,
   onAcceptRequest,
   onDeleteRequest,
-  onUnfriend,
   onUnblock,
   isPending,
 }) {
@@ -77,24 +77,14 @@ function RelationshipButton({
 
   if (isFriend) {
     return (
-      <>
-        <button
-          type="button"
-          onClick={onMessage}
-          className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
-          aria-label="Message"
-        >
-          <Mail className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onUnfriend}
-          disabled={isPending}
-          className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60 sm:h-9.5"
-        >
-          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Friends"}
-        </button>
-      </>
+      <button
+        type="button"
+        onClick={onMessage}
+        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
+        aria-label="Message"
+      >
+        <Mail className="h-4 w-4" />
+      </button>
     );
   }
 
@@ -158,6 +148,62 @@ function RelationshipButton({
   );
 }
 
+function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, isPending }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const showUnfriend = isFriend;
+  const showBlock = !isBlocked;
+  const hasOptions = showUnfriend || showBlock;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => hasOptions && setOpen((v) => !v)}
+        className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
+        aria-label="More options"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
+
+      {open && hasOptions && (
+        <div className="absolute right-0 top-full z-10 mt-1.5 w-40 overflow-hidden rounded-xl border border-border bg-white shadow-md">
+          {showUnfriend && (
+            <button
+              type="button"
+              onClick={() => { onUnfriend?.(); setOpen(false); }}
+              disabled={isPending}
+              className="flex w-full items-center px-4 py-2.5 text-sm text-foreground transition hover:bg-muted disabled:opacity-60"
+            >
+              Unfriend
+            </button>
+          )}
+          {showBlock && (
+            <button
+              type="button"
+              onClick={() => { onBlock?.(); setOpen(false); }}
+              disabled={isPending}
+              className="flex w-full items-center px-4 py-2.5 text-sm text-destructive transition hover:bg-destructive/10 disabled:opacity-60"
+            >
+              Block
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProfileDetailsSection({
   profile,
   isOwn = false,
@@ -172,11 +218,14 @@ function ProfileDetailsSection({
   onAcceptRequest,
   onDeleteRequest,
   onUnfriend,
+  onBlock,
   onUnblock,
   friendActionPending = false,
+  profileUserId,
 }) {
   const pictureInputRef = useRef(null);
   const coverInputRef = useRef(null);
+  const [friendsModalOpen, setFriendsModalOpen] = useState(false);
 
   if (!profile) return null;
 
@@ -266,33 +315,42 @@ function ProfileDetailsSection({
           </h1>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onMoreOptions}
-              className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
-              aria-label="More options"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-
             {isOwn ? (
-              <button
-                type="button"
-                className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
-              >
-                Edit Profile
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onMoreOptions}
+                  className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
+                  aria-label="More options"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
+                >
+                  Edit Profile
+                </button>
+              </>
             ) : (
-              <RelationshipButton
-                relationship={relationship}
-                onMessage={onMessage}
-                onAddFriend={onAddFriend}
-                onAcceptRequest={onAcceptRequest}
-                onDeleteRequest={onDeleteRequest}
-                onUnfriend={onUnfriend}
-                onUnblock={onUnblock}
-                isPending={friendActionPending}
-              />
+              <>
+                <MoreOptionsMenu
+                  isFriend={relationship?.isFriend}
+                  isBlocked={relationship?.isBlocked}
+                  onUnfriend={onUnfriend}
+                  onBlock={onBlock}
+                  isPending={friendActionPending}
+                />
+                <RelationshipButton
+                  relationship={relationship}
+                  onMessage={onMessage}
+                  onAddFriend={onAddFriend}
+                  onAcceptRequest={onAcceptRequest}
+                  onDeleteRequest={onDeleteRequest}
+                  onUnblock={onUnblock}
+                  isPending={friendActionPending}
+                />
+              </>
             )}
           </div>
         </div>
@@ -310,14 +368,26 @@ function ProfileDetailsSection({
             </span>{" "}
             Posts
           </p>
-          <p className="text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setFriendsModalOpen(true)}
+            className="text-muted-foreground transition hover:text-foreground"
+          >
             <span className="font-semibold text-foreground">
               {formatCount(friendCount)}
             </span>{" "}
             Friends
-          </p>
+          </button>
         </div>
       </div>
+
+      {friendsModalOpen && (
+        <FriendsModal
+          isOwn={isOwn}
+          profileUserId={profileUserId}
+          onClose={() => setFriendsModalOpen(false)}
+        />
+      )}
     </>
   );
 }

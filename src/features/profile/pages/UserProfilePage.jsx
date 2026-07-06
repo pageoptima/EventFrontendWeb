@@ -43,8 +43,10 @@ function UserProfilePage() {
             onAcceptRequest={() => actions.acceptRequest(requestId)}
             onDeleteRequest={() => actions.deleteRequest(requestId)}
             onUnfriend={actions.unfriend}
+            onBlock={actions.block}
             onUnblock={actions.unblock}
             friendActionPending={actions.isPending}
+            profileUserId={id}
           />
           <ProfilePostsSection
             activeTab={activeTab}

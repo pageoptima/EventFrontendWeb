@@ -14,6 +14,5 @@ export function useUserProfile(id) {
     queryKey: profileKeys.user(id),
     queryFn: () => getUserProfile(id),
     enabled: Boolean(id),
-    staleTime: 1000 * 60 * 2,
   });
 }

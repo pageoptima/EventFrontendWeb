@@ -19,7 +19,7 @@ const itemClass = (isActive) =>
   );
 
 function BottomNav() {
-  const { isNotificationsOpen, toggleNotifications } = useNotifications();
+  const { isNotificationsOpen, toggleNotifications, notificationCount } = useNotifications();
 
   return (
     <nav
@@ -37,7 +37,14 @@ function BottomNav() {
             aria-controls="notifications-panel"
             className={itemClass(isNotificationsOpen)}
           >
-            <item.Icon className="h-6 w-6" strokeWidth={1.8} />
+            <div className="relative">
+              <item.Icon className="h-6 w-6" strokeWidth={1.8} />
+              {notificationCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF2F3B] text-[9px] font-bold text-white">
+                  {notificationCount > 9 ? "9+" : notificationCount}
+                </span>
+              )}
+            </div>
           </button>
         ) : (
           <NavLink
