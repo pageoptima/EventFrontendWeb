@@ -1,41 +1,45 @@
-import { useMemo, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { searchUsers } from "@/features/search/services/searchService";
 
-function useSearch(posts, events) {
+const DEBOUNCE_MS = 400;
+
+function useSearch() {
   const [query, setQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const timerRef = useRef(null);
 
-  const filteredPosts = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return posts;
+  useEffect(() => {
+    const trimmed = query.trim();
 
-    return posts.filter((post) => {
-      return (
-        post.user?.name?.toLowerCase().includes(normalizedQuery) ||
-        post.user?.handle?.toLowerCase().includes(normalizedQuery) ||
-        post.id.toLowerCase().includes(normalizedQuery) ||
-        post.description?.toLowerCase().includes(normalizedQuery)
-      );
-    });
-  }, [posts, query]);
+    if (!trimmed) {
+      setUsers([]);
+      setIsLoading(false);
+      clearTimeout(timerRef.current);
+      return;
+    }
 
-  const filteredEvents = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return events;
+    setIsLoading(true);
+    clearTimeout(timerRef.current);
 
-    return events.filter((event) => {
-      return (
-        event.name?.toLowerCase().includes(normalizedQuery) ||
-        event.place?.toLowerCase().includes(normalizedQuery) ||
-        event.id.toLowerCase().includes(normalizedQuery)
-      );
-    });
-  }, [events, query]);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const { users: results, hasMore: more } = await searchUsers(trimmed);
+        setUsers(results);
+        setHasMore(more);
+      } catch {
+        setUsers([]);
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+      }
+    }, DEBOUNCE_MS);
 
-  return {
-    query,
-    setQuery,
-    filteredPosts,
-    filteredEvents,
-  };
+    return () => clearTimeout(timerRef.current);
+  }, [query]);
+
+  return { query, setQuery, users, isLoading, hasMore };
 }
 
 export default useSearch;

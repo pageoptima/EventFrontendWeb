@@ -17,10 +17,15 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.user = null;
     },
+    patchUser(state, action) {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials, patchUser } = authSlice.actions;
 
 // Selectors
 export const selectAccessToken = (state) => state.auth.accessToken;
