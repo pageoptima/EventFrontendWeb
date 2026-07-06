@@ -1,12 +1,50 @@
 import { useDispatch } from "react-redux";
-import { LogOut } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LogOut, Loader2 } from "lucide-react";
 import { clearCredentials } from "@/stores/slices/authSlice";
+import { useBlockedUsers } from "@/features/friend/hooks/useFriendQueries";
+import { friendKeys } from "@/features/friend/queryKeys";
+import { unblockUser } from "@/features/friend/services/friendService";
+
+function BlockedUserItem({ user }) {
+  const queryClient = useQueryClient();
+
+  const unblock = useMutation({
+    mutationFn: () => unblockUser(user.id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: friendKeys.blocklist() }),
+  });
+
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      {user.profilePicture ? (
+        <img
+          src={user.profilePicture}
+          alt={user.name}
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
+          {user.name?.[0]?.toUpperCase() ?? "?"}
+        </div>
+      )}
+      <span className="flex-1 text-sm font-medium text-foreground">{user.name}</span>
+      <button
+        type="button"
+        onClick={() => unblock.mutate()}
+        disabled={unblock.isPending}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
+      >
+        {unblock.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Unblock"}
+      </button>
+    </div>
+  );
+}
 
 function SettingsPage() {
   const dispatch = useDispatch();
+  const { data: blockedUsers = [], isLoading: blocklistLoading } = useBlockedUsers();
 
-  // ProtectedRoute detects isAuthenticated=false after dispatch and handles
-  // the redirect to /auth/login — no need to navigate() here as well.
   const handleLogout = () => {
     dispatch(clearCredentials());
   };
@@ -32,6 +70,27 @@ function SettingsPage() {
           <LogOut className="h-4 w-4" aria-hidden="true" />
           Log out
         </button>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-4">
+        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Privacy
+        </p>
+        <p className="mt-2 px-1 text-sm font-medium text-foreground">Blocked Users</p>
+
+        {blocklistLoading ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : blockedUsers.length === 0 ? (
+          <p className="mt-2 px-1 text-sm text-muted-foreground">No blocked users.</p>
+        ) : (
+          <div className="mt-2 divide-y divide-border">
+            {blockedUsers.map((user) => (
+              <BlockedUserItem key={user.id} user={user} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

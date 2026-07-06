@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileKeys } from "@/features/profile/queryKeys";
+import { friendKeys } from "@/features/friend/queryKeys";
 import {
   sendFriendRequest,
   acceptFriendRequest,
@@ -12,37 +13,61 @@ import {
 export function useFriendActions(targetUserId) {
   const queryClient = useQueryClient();
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: profileKeys.user(targetUserId) });
+  const invalidate = (...keys) =>
+    Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
 
   const sendRequest = useMutation({
     mutationFn: () => sendFriendRequest(targetUserId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      friendKeys.outgoingRequests(),
+    ),
   });
 
   const acceptRequest = useMutation({
     mutationFn: (requestId) => acceptFriendRequest(requestId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      profileKeys.me(),
+      friendKeys.incomingRequests(),
+      friendKeys.myFriends(),
+    ),
   });
 
   const deleteRequest = useMutation({
     mutationFn: (requestId) => deleteFriendRequest(requestId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      friendKeys.incomingRequests(),
+      friendKeys.outgoingRequests(),
+    ),
   });
 
   const unfriend = useMutation({
     mutationFn: () => removeFriend(targetUserId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      profileKeys.me(),
+      friendKeys.myFriends(),
+    ),
   });
 
   const block = useMutation({
     mutationFn: () => blockUser(targetUserId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      profileKeys.me(),
+      friendKeys.myFriends(),
+      friendKeys.blocklist(),
+    ),
   });
 
   const unblock = useMutation({
     mutationFn: () => unblockUser(targetUserId),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(
+      profileKeys.user(targetUserId),
+      friendKeys.blocklist(),
+    ),
   });
 
   const isPending =

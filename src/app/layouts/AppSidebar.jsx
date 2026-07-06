@@ -18,7 +18,7 @@ const navItemClass = (isActive) =>
   );
 
 function AppSidebar() {
-  const { isNotificationsOpen, toggleNotifications } = useNotifications();
+  const { isNotificationsOpen, toggleNotifications, notificationCount } = useNotifications();
 
   const closeNotificationsIfOpen = () => {
     if (isNotificationsOpen) toggleNotifications();
@@ -53,7 +53,14 @@ function AppSidebar() {
               aria-controls="notifications-panel"
               title={item.label}
             >
-              <img src={item.icon} alt="" className="h-5 w-5 shrink-0" />
+              <div className="relative shrink-0">
+                <img src={item.icon} alt="" className="h-5 w-5" />
+                {notificationCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF2F3B] text-[9px] font-bold text-white">
+                    {notificationCount > 9 ? "9+" : notificationCount}
+                  </span>
+                )}
+              </div>
               <span className="hidden lg:block">{item.label}</span>
             </button>
           ) : (
@@ -91,7 +98,7 @@ function AppSidebar() {
             <NavLink
               to="/create-event"
               onClick={closeNotificationsIfOpen}
-              className="inline-flex h-10 w-[175px] max-w-full items-center gap-2 justify-start rounded-full bg-brand-gradient-h px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+              className="inline-flex h-10 w-43.75 max-w-full items-center gap-2 justify-start rounded-full bg-brand-gradient-h px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
             >
               <img
                 src={plusIcon}

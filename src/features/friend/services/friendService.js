@@ -17,3 +17,18 @@ export const blockUser = (blockedId) =>
 
 export const unblockUser = (blockedId) =>
   api.post("/friend/unblock", { blockedId }).then((r) => r.data);
+
+export const getMyFriends = () =>
+  api.get("/friend/friendlist").then((r) => r.data);
+
+export const getUserFriends = (userId) =>
+  api.get(`/friend/user/${userId}/friendlist`).then((r) => r.data);
+
+export const getIncomingRequests = () =>
+  api.get("/friend/request/incoming").then((r) => r.data);
+
+export const getOutgoingRequests = () =>
+  api.get("/friend/request/outgoing").then((r) => r.data);
+
+export const getBlockedUsers = () =>
+  api.get("/friend/blocklist").then((r) => r.data);
