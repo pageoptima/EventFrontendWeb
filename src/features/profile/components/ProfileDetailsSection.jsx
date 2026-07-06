@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Camera, Mail, MoreHorizontal, Loader2 } from "lucide-react";
 import FriendsModal from "@/features/profile/components/FriendsModal";
 
@@ -231,6 +232,7 @@ function ProfileDetailsSection({
   friendActionPending = false,
   profileUserId,
 }) {
+  const navigate = useNavigate();
   const pictureInputRef = useRef(null);
   const coverInputRef = useRef(null);
   const [friendsModalOpen, setFriendsModalOpen] = useState(false);
@@ -327,6 +329,7 @@ function ProfileDetailsSection({
             {isOwn ? (
               <button
                 type="button"
+                onClick={() => navigate("/settings")}
                 className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
               >
                 Edit Profile
