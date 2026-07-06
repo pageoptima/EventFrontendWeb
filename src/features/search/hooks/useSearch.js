@@ -1,45 +1,34 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { searchUsers } from "@/features/search/services/searchService";
+import { searchKeys } from "@/features/search/queryKeys";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 
 const DEBOUNCE_MS = 400;
 
 function useSearch() {
   const [query, setQuery] = useState("");
-  const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const timerRef = useRef(null);
+  const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_MS);
 
-  useEffect(() => {
-    const trimmed = query.trim();
+  const { data, isFetching } = useQuery({
+    queryKey: searchKeys.users(debouncedQuery),
+    queryFn: () => searchUsers(debouncedQuery),
+    enabled: debouncedQuery.length > 0,
+    staleTime: 1000 * 30,
+  });
 
-    if (!trimmed) {
-      setUsers([]);
-      setIsLoading(false);
-      clearTimeout(timerRef.current);
-      return;
-    }
+  // Show spinner while typing (pre-debounce) or while the request is in flight.
+  const isLoading =
+    query.trim().length > 0 &&
+    (query.trim() !== debouncedQuery || isFetching);
 
-    setIsLoading(true);
-    clearTimeout(timerRef.current);
-
-    timerRef.current = setTimeout(async () => {
-      try {
-        const { users: results, hasMore: more } = await searchUsers(trimmed);
-        setUsers(results);
-        setHasMore(more);
-      } catch {
-        setUsers([]);
-        setHasMore(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }, DEBOUNCE_MS);
-
-    return () => clearTimeout(timerRef.current);
-  }, [query]);
-
-  return { query, setQuery, users, isLoading, hasMore };
+  return {
+    query,
+    setQuery,
+    users: data?.users ?? [],
+    hasMore: data?.hasMore ?? false,
+    isLoading,
+  };
 }
 
 export default useSearch;
