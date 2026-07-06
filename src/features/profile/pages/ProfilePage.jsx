@@ -1,75 +1,89 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
 import RightSidebar from "@/shared/components/RightSidebar";
 import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsSection";
 import ProfilePostsSection from "@/features/profile/components/ProfilePostsSection";
-import { events } from "@/app/config/events";
-import { feedPosts } from "@/app/config/posts";
-import { profiles } from "@/app/config/profiles";
-import { teasers } from "@/app/config/teaser";
+import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
+import { useMyProfile } from "@/features/profile/hooks/useMyProfile";
+import { profileKeys } from "@/features/profile/queryKeys";
+import {
+  updateProfilePicture,
+  updateCoverPicture,
+} from "@/features/profile/services/profileService";
+import { patchUser } from "@/stores/slices/authSlice";
 
 function ProfilePage() {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading, error, refetch } = useMyProfile();
   const [activeTab, setActiveTab] = useState("events");
-  const activeProfile = profiles[0];
-  const followedByProfile = profiles[5] ?? profiles[1];
 
-  const eventGallery = useMemo(() => {
-    const eventCards = events.map((event, index) => ({
-      id: `event-gallery-${event.id}`,
-      image: event.image,
-      caption: `Upcoming event #${index + 1}`,
-      likes: event.likes,
-      views: `${(index + 2) * 9}k`,
-    }));
+  const pictureMutation = useMutation({
+    mutationFn: updateProfilePicture,
+    onSuccess: (data) => {
+      queryClient.setQueryData(profileKeys.me(), (old) => ({
+        ...old,
+        profilePicture: data.profilePicture,
+      }));
+      dispatch(patchUser({ profilePicture: data.profilePicture }));
+    },
+  });
 
-    const postCards = feedPosts.map((post, index) => ({
-      id: `post-gallery-${post.id}`,
-      image: post.image,
-      caption: `Event moment ${index + 1}`,
-      likes: post.likes,
-      views: post.views,
-    }));
+  const coverMutation = useMutation({
+    mutationFn: updateCoverPicture,
+    onSuccess: (data) => {
+      queryClient.setQueryData(profileKeys.me(), (old) => ({
+        ...old,
+        coverPicture: data.coverPicture,
+      }));
+    },
+  });
 
-    return [...eventCards, ...postCards].slice(0, 12);
-  }, []);
+  const uploadError =
+    pictureMutation.error?.message ||
+    coverMutation.error?.message ||
+    "";
 
-  const teaserGallery = useMemo(
-    () =>
-      teasers.map((teaser, index) => ({
-        id: teaser.id,
-        image: teaser.image,
-        caption: teaser.caption ?? `Teaser ${index + 1}`,
-        likes: teaser.likes ?? "0",
-        views: teaser.views ?? "0",
-      })),
-    [],
-  );
+  if (isLoading) return <ProfileSkeleton />;
 
-  const userDetails = useMemo(
-    () => ({
-      ...activeProfile,
-      postsCount: eventGallery.length,
-      followedBy: followedByProfile,
-    }),
-    [activeProfile, eventGallery.length, followedByProfile],
-  );
-
-  const postsByTab = useMemo(
-    () => ({
-      events: eventGallery,
-      teaser: teaserGallery,
-    }),
-    [eventGallery, teaserGallery],
-  );
+  if (error) {
+    return (
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_252px] xl:grid-cols-[minmax(0,1fr)_313px]">
+        <section>
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-border py-16 text-center">
+            <p className="text-sm text-destructive">Failed to load profile.</p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="rounded-full bg-brand-gradient-h px-4 py-1.5 text-xs font-semibold text-white"
+            >
+              Retry
+            </button>
+          </div>
+        </section>
+        <RightSidebar />
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_252px] xl:grid-cols-[minmax(0,1fr)_313px]">
       <section>
         <article className="overflow-hidden rounded-2xl border border-border">
-          <ProfileDetailsSection userDetails={userDetails} />
+          <ProfileDetailsSection
+            profile={profile}
+            isOwn
+            onProfilePictureChange={(file) => pictureMutation.mutate(file)}
+            onCoverPictureChange={(file) => coverMutation.mutate(file)}
+            uploadingPicture={pictureMutation.isPending}
+            uploadingCover={coverMutation.isPending}
+            uploadError={uploadError}
+          />
           <ProfilePostsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            postsByTab={postsByTab}
+            postsByTab={{ events: [], teaser: [] }}
           />
         </article>
       </section>

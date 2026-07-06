@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   accessToken: null,
-  user: null, // { id, name, email }
+  user: null, // { id, name, email, role } — decoded from JWT on login/register
 };
 
 const authSlice = createSlice({
@@ -17,10 +17,15 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.user = null;
     },
+    patchUser(state, action) {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials, patchUser } = authSlice.actions;
 
 // Selectors
 export const selectAccessToken = (state) => state.auth.accessToken;

@@ -5,6 +5,7 @@ import { login } from "@/features/auth/services/authService";
 import { VALIDATION } from "@/shared/utils/constants";
 import { getApiErrorMessage } from "@/shared/utils/errors";
 import { EMAIL_REGEX } from "@/shared/utils/regex";
+import { decodeJwt } from "@/shared/utils/jwt";
 
 const INITIAL_FIELDS = { email: "", password: "" };
 const INITIAL_ERRORS = { email: "", password: "" };
@@ -49,10 +50,7 @@ export function useLoginForm() {
         email: fields.email.trim(),
         password: fields.password,
       });
-      // Dispatch only — PublicRoute detects isAuthenticated=true and
-      // redirects to location.state.from (or "/") declaratively.
-      // Calling navigate() here as well causes a double-navigation race.
-      dispatch(setCredentials({ accessToken, user: null }));
+      dispatch(setCredentials({ accessToken, user: decodeJwt(accessToken) }));
     } catch (err) {
       setApiError(getApiErrorMessage(err));
     } finally {

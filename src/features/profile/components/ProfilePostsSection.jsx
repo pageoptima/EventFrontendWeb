@@ -29,11 +29,17 @@ function ProfilePostsSection({ activeTab, onTabChange, postsByTab }) {
         ))}
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-        {gallery.map((item) => (
-          <GalleryCard key={item.id} item={item} />
-        ))}
-      </div>
+      {gallery.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-14 text-center">
+          <p className="text-sm text-muted-foreground">No {activeTab} yet.</p>
+        </div>
+      ) : (
+        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
+          {gallery.map((item) => (
+            <GalleryCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
