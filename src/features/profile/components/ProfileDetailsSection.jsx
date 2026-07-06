@@ -17,7 +17,7 @@ function Avatar({ name, profilePicture, isOwn, uploading, onChangeClick }) {
   const initial = name?.[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="absolute -bottom-10 left-4 h-21 w-21 rounded-full bg-brand-gradient p-0.5 sm:left-6 sm:h-31 sm:w-31">
+    <div className="absolute -bottom-10 left-4 h-21 w-21 rounded-full bg-brand-gradient avatar-ring p-0.5 sm:left-6 sm:h-31 sm:w-31">
       <div className="relative h-full w-full overflow-hidden rounded-full bg-white dark:bg-background p-0.5">
         {profilePicture ? (
           <img

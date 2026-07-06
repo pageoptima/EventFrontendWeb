@@ -10,11 +10,11 @@ const primaryItems = sidebarMainItems.filter((item) => item.to !== "/settings");
 
 const navItemClass = (isActive) =>
   cn(
-    "flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium transition-colors",
+    "flex items-center gap-3 rounded-full dark:rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors",
     "md:justify-center md:px-2 lg:justify-start lg:px-3",
     isActive
-      ? "bg-[linear-gradient(90deg,#B839F1_0%,#2A104F00_100%)] text-white"
-      : "text-white/80 hover:text-white hover:bg-white/10",
+      ? "bg-[linear-gradient(90deg,#B839F1_0%,#2A104F00_100%)] dark:bg-[linear-gradient(90deg,rgba(85,95,215,0.35)_0%,rgba(44,184,232,0.05)_100%)] text-white"
+      : "text-white/80 dark:text-[#9C96B8] hover:text-white dark:hover:text-[#F4F2FA] hover:bg-white/10 dark:hover:bg-white/5",
   );
 
 function AppSidebar() {
@@ -28,7 +28,7 @@ function AppSidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-30 h-screen shrink-0 overflow-y-auto text-white",
-        "bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)] dark:bg-none dark:bg-[#0A0714]",
+        "bg-[linear-gradient(135deg,#2A104F_0%,#2A104F_50%,#8B1B3E_70%,#FF2323_100%)] dark:bg-[linear-gradient(180deg,#16132E_0%,#060410_100%)]",
         // Hidden on mobile, icon-only on tablet, full on desktop
         "hidden md:flex md:w-16 lg:w-64 flex-col",
       )}
@@ -98,7 +98,7 @@ function AppSidebar() {
             <NavLink
               to="/create-event"
               onClick={closeNotificationsIfOpen}
-              className="inline-flex h-10 w-43.75 max-w-full items-center gap-2 justify-start rounded-full bg-brand-gradient-h px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+              className="inline-flex h-10 w-full items-center gap-2 justify-start rounded-full dark:rounded-2xl bg-brand-gradient-h px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
             >
               <img
                 src={plusIcon}
