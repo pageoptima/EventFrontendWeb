@@ -56,7 +56,6 @@ function RelationshipButton({
   onAddFriend,
   onAcceptRequest,
   onDeleteRequest,
-  onUnblock,
   isPending,
 }) {
   const { isFriend, isBlocked, requestSent, requestReceived, requestId } =
@@ -66,11 +65,10 @@ function RelationshipButton({
     return (
       <button
         type="button"
-        onClick={onUnblock}
-        disabled={isPending}
-        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-destructive transition hover:bg-destructive/10 disabled:opacity-60 sm:h-9.5"
+        disabled
+        className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-destructive opacity-60 sm:h-9.5"
       >
-        {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Blocked"}
+        Blocked
       </button>
     );
   }
@@ -148,7 +146,7 @@ function RelationshipButton({
   );
 }
 
-function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, isPending }) {
+function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, onUnblock, isPending }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -161,9 +159,10 @@ function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, isPending }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const showUnfriend = isFriend;
+  const showUnfriend = isFriend && !isBlocked;
   const showBlock = !isBlocked;
-  const hasOptions = showUnfriend || showBlock;
+  const showUnblock = isBlocked;
+  const hasOptions = showUnfriend || showBlock || showUnblock;
 
   return (
     <div ref={ref} className="relative">
@@ -198,6 +197,16 @@ function MoreOptionsMenu({ isFriend, isBlocked, onUnfriend, onBlock, isPending }
               Block
             </button>
           )}
+          {showUnblock && (
+            <button
+              type="button"
+              onClick={() => { onUnblock?.(); setOpen(false); }}
+              disabled={isPending}
+              className="flex w-full items-center px-4 py-2.5 text-sm text-foreground transition hover:bg-muted disabled:opacity-60"
+            >
+              Unblock
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -212,7 +221,6 @@ function ProfileDetailsSection({
   uploadingPicture = false,
   uploadingCover = false,
   uploadError = "",
-  onMoreOptions,
   onMessage,
   onAddFriend,
   onAcceptRequest,
@@ -230,6 +238,7 @@ function ProfileDetailsSection({
   if (!profile) return null;
 
   const { name, bio, profilePicture, coverPicture, postCount, friendCount, relationship } = profile;
+  const isBlockedByThem = !isOwn && Boolean(relationship?.isBlockedByThem);
 
   const handlePictureFile = (e) => {
     const file = e.target.files?.[0];
@@ -316,29 +325,20 @@ function ProfileDetailsSection({
 
           <div className="flex items-center gap-2">
             {isOwn ? (
-              <>
-                <button
-                  type="button"
-                  onClick={onMoreOptions}
-                  className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-border bg-white text-slate-700 transition hover:bg-slate-50 sm:h-9.75 sm:w-9.75"
-                  aria-label="More options"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
-                >
-                  Edit Profile
-                </button>
-              </>
-            ) : (
+              <button
+                type="button"
+                className="h-8.5 rounded-full border border-border bg-white px-4 text-xs font-semibold text-foreground transition hover:bg-muted sm:h-9.5"
+              >
+                Edit Profile
+              </button>
+            ) : !isBlockedByThem ? (
               <>
                 <MoreOptionsMenu
                   isFriend={relationship?.isFriend}
                   isBlocked={relationship?.isBlocked}
                   onUnfriend={onUnfriend}
                   onBlock={onBlock}
+                  onUnblock={onUnblock}
                   isPending={friendActionPending}
                 />
                 <RelationshipButton
@@ -347,11 +347,10 @@ function ProfileDetailsSection({
                   onAddFriend={onAddFriend}
                   onAcceptRequest={onAcceptRequest}
                   onDeleteRequest={onDeleteRequest}
-                  onUnblock={onUnblock}
                   isPending={friendActionPending}
                 />
               </>
-            )}
+            ) : null}
           </div>
         </div>
 
