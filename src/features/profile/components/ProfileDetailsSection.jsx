@@ -126,7 +126,7 @@ function RelationshipButton({
         {isPending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         ) : (
-          "Request Sent"
+          "Cancel Request"
         )}
       </button>
     );
