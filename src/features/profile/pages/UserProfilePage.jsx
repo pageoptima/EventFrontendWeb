@@ -4,7 +4,7 @@ import RightSidebar from "@/shared/components/RightSidebar";
 import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsSection";
 import ProfilePostsSection from "@/features/profile/components/ProfilePostsSection";
 import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
-import { useUserProfile } from "@/features/profile/hooks/useUserProfile";
+import { useUserProfile } from "@/features/profile/hooks/useProfile";
 
 function UserProfilePage() {
   const { id } = useParams();
