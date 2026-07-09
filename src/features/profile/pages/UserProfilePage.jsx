@@ -11,7 +11,7 @@ function UserProfilePage() {
   const { id } = useParams();
   const { data: profile, isLoading, error } = useUserProfile(id);
   const actions = useFriendActions(id);
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useState("posts");
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -51,7 +51,7 @@ function UserProfilePage() {
           <ProfilePostsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            postsByTab={{ events: [], teaser: [] }}
+            postsByTab={{ posts: [], events: [], teaser: [] }}
           />
         </article>
       </section>

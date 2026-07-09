@@ -5,7 +5,9 @@ import AppLayout from "@/app/layouts/AppLayout";
 import AuthLayout from "@/app/layouts/AuthLayout";
 import {
   Chats,
-  CreateEvent,
+  CreatePost,
+  CreateTeaser,
+  CreateLiveEvent,
   Home,
   Login,
   NotFound,
@@ -31,7 +33,9 @@ const router = createBrowserRouter([
           { path: "chats", element: <Chats /> },
           { path: "profile", element: <Profile /> },
           { path: "profile/:id", element: <UserProfile /> },
-          { path: "create-event", element: <CreateEvent /> },
+          { path: "create-post", element: <CreatePost /> },
+          { path: "create-teaser", element: <CreateTeaser /> },
+          { path: "create-live-event", element: <CreateLiveEvent /> },
           { path: "settings", element: <Settings /> },
           { path: "*", element: <NotFound /> },
         ],

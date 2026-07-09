@@ -17,7 +17,7 @@ function ProfilePage() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { data: profile, isLoading, error, refetch } = useMyProfile();
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useState("posts");
 
   const pictureMutation = useMutation({
     mutationFn: updateProfilePicture,
@@ -83,7 +83,7 @@ function ProfilePage() {
           <ProfilePostsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            postsByTab={{ events: [], teaser: [] }}
+            postsByTab={{ posts: [], events: [], teaser: [] }}
           />
         </article>
       </section>

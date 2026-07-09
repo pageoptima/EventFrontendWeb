@@ -1,7 +1,8 @@
-import { Grid3X3, PlaySquare } from "lucide-react";
+import { Grid3X3, PlaySquare, ImageIcon } from "lucide-react";
 import GalleryCard from "@/features/profile/components/GalleryCard";
 
 const tabs = [
+  { key: "posts", label: "Posts", Icon: ImageIcon },
   { key: "events", label: "Events", Icon: Grid3X3 },
   { key: "teaser", label: "Teaser", Icon: PlaySquare },
 ];
@@ -11,7 +12,7 @@ function ProfilePostsSection({ activeTab, onTabChange, postsByTab }) {
 
   return (
     <div className="border-t border-border px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {tabs.map((tab) => (
           <button
             key={tab.key}
