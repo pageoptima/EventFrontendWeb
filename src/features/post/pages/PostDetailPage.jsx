@@ -6,6 +6,7 @@ import { usePostComments, useCreateComment, useToggleCommentLike } from "@/featu
 import PostMediaCarousel from "@/features/post/components/PostMediaCarousel";
 import CommentItem from "@/features/post/components/CommentItem";
 import PostOptionsMenu from "@/features/post/components/PostOptionsMenu";
+import PostLikesModal from "@/features/post/components/PostLikesModal";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
@@ -22,7 +23,7 @@ function AuthorRow({ author, postId, currentVisibility, isOwn, className = "" })
   );
 }
 
-function ActionsBar({ post, onToggleLike, isPending }) {
+function ActionsBar({ post, onToggleLike, isPending, onShowLikes }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -34,7 +35,14 @@ function ActionsBar({ post, onToggleLike, isPending }) {
         <Heart
           className={`h-5 w-5 transition ${post.likedByMe ? "fill-red-500 text-red-500" : ""}`}
         />
-        <span>{post.likeCount ?? 0}</span>
+      </button>
+      <button
+        type="button"
+        onClick={onShowLikes}
+        disabled={(post.likeCount ?? 0) === 0}
+        className="text-sm font-semibold text-foreground disabled:cursor-default"
+      >
+        {post.likeCount ?? 0} {post.likeCount === 1 ? "like" : "likes"}
       </button>
       <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
         <MessageCircle className="h-5 w-5" />
@@ -51,6 +59,8 @@ function PostDetailPage() {
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState(null);
   const commentInputRef = useRef(null);
+
+  const [showLikes, setShowLikes] = useState(false);
 
   const { data: post, isLoading, error } = usePost(postId);
   const toggleLike = useTogglePostLike(postId);
@@ -151,6 +161,7 @@ function PostDetailPage() {
   );
 
   return (
+    <>
     <div className="mx-auto max-w-5xl">
       <button
         type="button"
@@ -182,6 +193,7 @@ function PostDetailPage() {
               post={post}
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
+              onShowLikes={() => setShowLikes(true)}
             />
           </div>
         </div>
@@ -258,6 +270,7 @@ function PostDetailPage() {
               post={post}
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
+              onShowLikes={() => setShowLikes(true)}
             />
           </div>
 
@@ -266,6 +279,15 @@ function PostDetailPage() {
         </div>
       </div>
     </div>
+
+    {showLikes && (
+      <PostLikesModal
+        postId={postId}
+        likeCount={post.likeCount ?? 0}
+        onClose={() => setShowLikes(false)}
+      />
+    )}
+    </>
   );
 }
 

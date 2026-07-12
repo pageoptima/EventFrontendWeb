@@ -57,6 +57,17 @@ export const createPostComment = ({ postId, content, parentId }) =>
 export const toggleCommentLike = (commentId) =>
   api.post(`/posts/comments/${commentId}/like`).then((r) => r.data);
 
+export const getPostLikes = ({ postId, cursorUserId, cursorCreatedAt, limit = 20 }) =>
+  api
+    .get(`/posts/${postId}/likes`, {
+      params: {
+        limit,
+        ...(cursorUserId && { cursorUserId }),
+        ...(cursorCreatedAt && { cursorCreatedAt }),
+      },
+    })
+    .then((r) => r.data);
+
 export const deletePost = (postId) =>
   api.delete(`/posts/${postId}`).then((r) => r.data);
 

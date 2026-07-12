@@ -4,4 +4,5 @@ export const postKeys = {
   detail: (id) => [...postKeys.all, "detail", id],
   userPosts: (userId) => [...postKeys.all, "userPosts", userId],
   comments: (postId) => [...postKeys.all, "comments", postId],
+  likes: (postId) => [...postKeys.all, "likes", postId],
 };

@@ -1,8 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
   getPost,
   togglePostLike,
+  getPostLikes,
   deletePost,
   changePostVisibility,
 } from "@/features/post/services/postService";
@@ -53,6 +54,21 @@ export function useTogglePostLike(postId) {
         old ? { ...old, likeCount: data.likeCount, likedByMe: data.liked } : old,
       );
     },
+  });
+}
+
+export function usePostLikes(postId, { enabled = false } = {}) {
+  return useInfiniteQuery({
+    queryKey: postKeys.likes(postId),
+    queryFn: ({ pageParam }) =>
+      getPostLikes({
+        postId,
+        cursorUserId: pageParam?.userId,
+        cursorCreatedAt: pageParam?.createdAt,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    initialPageParam: undefined,
+    enabled: !!postId && enabled,
   });
 }
 

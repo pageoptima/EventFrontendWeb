@@ -1,15 +1,30 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Heart, ChevronDown, ChevronUp } from "lucide-react";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 
 function ReplyItem({ reply, onToggleLike }) {
+  const navigate = useNavigate();
+
+  function goToProfile() {
+    if (reply.user?.id) navigate(`/profile/${reply.user.id}`);
+  }
+
   return (
     <div className="flex gap-2">
-      <UserAvatar user={reply.user} size="sm" />
+      <button type="button" onClick={goToProfile} className="shrink-0">
+        <UserAvatar user={reply.user} size="sm" />
+      </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <span className="text-xs font-semibold text-foreground">{reply.user?.name}</span>
+            <button
+              type="button"
+              onClick={goToProfile}
+              className="text-xs font-semibold text-foreground hover:underline"
+            >
+              {reply.user?.name}
+            </button>
             <p className="mt-0.5 text-xs text-foreground">{reply.content}</p>
           </div>
           <button
@@ -29,15 +44,28 @@ function ReplyItem({ reply, onToggleLike }) {
 }
 
 function CommentItem({ comment, onReply, onToggleLike }) {
+  const navigate = useNavigate();
   const [showReplies, setShowReplies] = useState(false);
+
+  function goToProfile() {
+    if (comment.user?.id) navigate(`/profile/${comment.user.id}`);
+  }
 
   return (
     <div className="flex gap-2.5">
-      <UserAvatar user={comment.user} size="md" />
+      <button type="button" onClick={goToProfile} className="shrink-0">
+        <UserAvatar user={comment.user} size="md" />
+      </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <span className="text-xs font-semibold text-foreground">{comment.user?.name}</span>
+            <button
+              type="button"
+              onClick={goToProfile}
+              className="text-xs font-semibold text-foreground hover:underline"
+            >
+              {comment.user?.name}
+            </button>
             <p className="mt-0.5 text-sm text-foreground">{comment.content}</p>
           </div>
           <button
