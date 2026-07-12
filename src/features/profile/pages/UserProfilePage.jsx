@@ -51,7 +51,7 @@ function UserProfilePage() {
           <ProfilePostsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            postsByTab={{ posts: [], events: [], teaser: [] }}
+            userId={profile.id}
           />
         </article>
       </section>

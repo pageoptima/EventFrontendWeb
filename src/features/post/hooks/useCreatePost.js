@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createDraft,
   getDraft,
@@ -37,6 +37,7 @@ function buildMediaItem(file, order) {
 }
 
 export function useCreatePost() {
+  const queryClient = useQueryClient();
   const [draftId, setDraftId] = useState(null);
   const draftIdRef = useRef(null);
 
@@ -217,12 +218,13 @@ export function useCreatePost() {
         tags: form.tags,
       });
       await publishDraft(id);
+      queryClient.invalidateQueries({ queryKey: postKeys.userPosts("me") });
       setPublishState("success");
     } catch (err) {
       setPublishError(getApiErrorMessage(err));
       setPublishState("error");
     }
-  }, [form]);
+  }, [form, queryClient]);
 
   const isUploading = mediaItems.some(
     (m) => m.uploadStatus === "uploading" || m.uploadStatus === "pending",

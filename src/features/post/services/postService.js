@@ -30,3 +30,35 @@ export const publishDraft = (postId) =>
 
 export const deleteDraftMedia = (postId, mediaId) =>
   api.delete(`/posts/drafts/${postId}/media/${mediaId}`).then((r) => r.data);
+
+export const getUserPosts = ({ userId, cursor, limit = 20 }) => {
+  const url = userId === "me" ? "/posts/users/me" : `/posts/users/${userId}`;
+  return api
+    .get(url, { params: { limit, ...(cursor && { cursor }) } })
+    .then((r) => r.data);
+};
+
+export const getPost = (postId) =>
+  api.get(`/posts/${postId}`).then((r) => r.data);
+
+export const togglePostLike = (postId) =>
+  api.post(`/posts/${postId}/likes`).then((r) => r.data);
+
+export const getPostComments = ({ postId, cursor, limit = 20 }) =>
+  api
+    .get(`/posts/${postId}/comments`, { params: { limit, ...(cursor && { cursor }) } })
+    .then((r) => r.data);
+
+export const createPostComment = ({ postId, content, parentId }) =>
+  api
+    .post(`/posts/${postId}/comments`, { content, ...(parentId && { parentId }) })
+    .then((r) => r.data);
+
+export const toggleCommentLike = (commentId) =>
+  api.post(`/posts/comments/${commentId}/like`).then((r) => r.data);
+
+export const deletePost = (postId) =>
+  api.delete(`/posts/${postId}`).then((r) => r.data);
+
+export const changePostVisibility = (postId, visibility) =>
+  api.patch(`/posts/${postId}/visibility`, { visibility }).then((r) => r.data);

@@ -30,12 +30,12 @@ function FeedPost({ post }) {
       </header>
 
       <div className="px-4 pb-4">
-        <div className="overflow-hidden rounded-xl border border-border bg-muted">
+        <div className="w-full overflow-hidden rounded-xl border border-border bg-muted">
           <img
             src={post.image}
             alt={`${post.user.name} post`}
             loading="lazy"
-            className="h-52 w-full object-cover sm:h-72 lg:h-80 xl:h-90"
+            className="h-64 w-full object-cover sm:h-80 lg:h-96"
           />
         </div>
 

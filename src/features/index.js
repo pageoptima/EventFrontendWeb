@@ -1,3 +1,4 @@
+export { default as PostDetail } from "@/features/post";
 export { default as Home } from "@/features/home";
 export { default as Search } from "@/features/search";
 export { default as Teaser } from "@/features/teaser";

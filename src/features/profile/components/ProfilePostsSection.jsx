@@ -1,5 +1,7 @@
+import { useRef, useEffect } from "react";
 import { Grid3X3, PlaySquare, ImageIcon } from "lucide-react";
 import GalleryCard from "@/features/profile/components/GalleryCard";
+import { useUserPosts } from "@/features/post/hooks/useUserPosts";
 
 const tabs = [
   { key: "posts", label: "Posts", Icon: ImageIcon },
@@ -7,9 +9,65 @@ const tabs = [
   { key: "teaser", label: "Teaser", Icon: PlaySquare },
 ];
 
-function ProfilePostsSection({ activeTab, onTabChange, postsByTab }) {
-  const gallery = postsByTab?.[activeTab] ?? [];
+function PostsGrid({ userId }) {
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useUserPosts(userId);
+  const loaderRef = useRef(null);
 
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  if (isLoading) {
+    return (
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />
+        ))}
+      </div>
+    );
+  }
+
+  const posts = data?.pages.flatMap((p) => p.posts) ?? [];
+
+  if (posts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-14 text-center">
+        <p className="text-sm text-muted-foreground">No posts yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {posts.map((post) => (
+          <GalleryCard key={post.id} post={post} />
+        ))}
+      </div>
+      <div ref={loaderRef} className="py-2">
+        {isFetchingNextPage && (
+          <div className="flex justify-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-foreground" />
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function ProfilePostsSection({ activeTab, onTabChange, userId }) {
   return (
     <div className="border-t border-border px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
       <div className="grid grid-cols-3 gap-2">
@@ -30,15 +88,11 @@ function ProfilePostsSection({ activeTab, onTabChange, postsByTab }) {
         ))}
       </div>
 
-      {gallery.length === 0 ? (
+      {activeTab === "posts" ? (
+        <PostsGrid userId={userId} />
+      ) : (
         <div className="flex flex-col items-center justify-center py-14 text-center">
           <p className="text-sm text-muted-foreground">No {activeTab} yet.</p>
-        </div>
-      ) : (
-        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-          {gallery.map((item) => (
-            <GalleryCard key={item.id} item={item} />
-          ))}
         </div>
       )}
     </div>
