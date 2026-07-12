@@ -1,20 +1,11 @@
 import { useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/stores/appStore";
 import { NotificationsProvider } from "@/features/notifications";
 import { selectThemeMode } from "@/stores/slices/themeSlice";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 0,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { queryClient } from "@/lib/queryClient";
 
 function ThemeApplicator() {
   const mode = useSelector(selectThemeMode);

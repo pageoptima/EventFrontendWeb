@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { searchUsers } from "@/features/search/services/searchService";
 import { searchKeys } from "@/features/search/queryKeys";
@@ -7,7 +8,16 @@ import { useDebounce } from "@/shared/hooks/useDebounce";
 const DEBOUNCE_MS = 400;
 
 function useSearch() {
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("q") ?? "";
+
+  const setQuery = useCallback(
+    (value) => {
+      setSearchParams(value ? { q: value } : {}, { replace: true });
+    },
+    [setSearchParams],
+  );
+
   const debouncedQuery = useDebounce(query.trim(), DEBOUNCE_MS);
 
   const { data, isFetching } = useQuery({

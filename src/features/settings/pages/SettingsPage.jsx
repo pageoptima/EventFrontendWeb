@@ -87,6 +87,7 @@ function SentRequestItem({ request }) {
 
 function SettingsPage() {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
   const { data: blockedUsers = [], isLoading: blocklistLoading } = useBlockedUsers();
@@ -94,6 +95,7 @@ function SettingsPage() {
 
   const handleLogout = () => {
     dispatch(clearCredentials());
+    queryClient.clear();
   };
 
   return (

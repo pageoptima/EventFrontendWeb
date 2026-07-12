@@ -6,8 +6,9 @@ import {
   clearCredentials,
   selectAccessToken,
 } from "@/stores/slices/authSlice";
+import { queryClient } from "@/lib/queryClient";
 
-// Import graph is acyclic: authSlice → (none), appStore → authSlice, apis → appStore + authSlice
+// Import graph is acyclic: authSlice → (none), appStore → authSlice, queryClient → (none), apis → appStore + authSlice + queryClient
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,6 +31,7 @@ api.interceptors.response.use(
   (error) => {
     if (error?.response?.status === HTTP_STATUS.UNAUTHORIZED) {
       store.dispatch(clearCredentials());
+      queryClient.clear();
     }
     return Promise.reject(error);
   },

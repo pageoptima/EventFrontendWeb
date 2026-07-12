@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle } from "lucide-react";
 import { usePost, useTogglePostLike } from "@/features/post/hooks/usePost";
 import { usePostComments, useCreateComment, useToggleCommentLike } from "@/features/post/hooks/usePostComments";
@@ -206,12 +206,13 @@ function PostDetailPage() {
             {post.tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {post.tags.map((tag) => (
-                  <span
+                  <Link
                     key={tag.id}
-                    className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                    to={`/search?q=${encodeURIComponent(tag.name)}`}
+                    className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors"
                   >
                     #{tag.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
