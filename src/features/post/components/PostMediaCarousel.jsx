@@ -1,32 +1,33 @@
-import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function PostMediaCarousel({ medias = [] }) {
-  const [current, setCurrent] = useState(0);
+function PostMediaCarousel({ medias = [], current = 0, onChange }) {
+  function setCurrent(nextIndex) {
+    onChange?.(nextIndex);
+  }
 
   if (medias.length === 0) {
-    return <div className="aspect-square bg-muted" />;
+    return <div className="aspect-square w-full bg-muted lg:h-full lg:aspect-auto" />;
   }
 
   const media = medias[current];
   const isVideo = media?.type === "VIDEO";
 
   return (
-    <div className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-card">
-      <div className="relative aspect-square w-full overflow-hidden lg:aspect-auto lg:h-full">
+    <div className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-[#05010f]">
+      <div className="relative aspect-square w-full overflow-hidden lg:h-full lg:aspect-auto">
         {isVideo ? (
           <video
             key={media.url}
             src={media.url}
             controls
-            className="h-full w-full object-contain lg:object-cover"
+            className="h-full w-full object-contain"
           />
         ) : (
           <img
             key={media.url ?? current}
             src={media.url ?? undefined}
             alt={`Media ${current + 1}`}
-            className="h-full w-full object-contain lg:object-cover"
+            className="h-full w-full object-contain"
           />
         )}
       </div>

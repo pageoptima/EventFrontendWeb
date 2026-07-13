@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle } from "lucide-react";
 import { usePost, useTogglePostLike } from "@/features/post/hooks/usePost";
@@ -10,14 +10,29 @@ import PostLikesModal from "@/features/post/components/PostLikesModal";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
+const DESKTOP_SIDEBAR_WIDTH = 380;
+
+function getMediaAspectRatio(media) {
+  const width = media?.image_meta?.width ?? media?.video_meta?.width ?? null;
+  const height = media?.image_meta?.height ?? media?.video_meta?.height ?? null;
+
+  if (!width || !height) return 1;
+
+  return width / height;
+}
+
 function AuthorRow({ author, postId, currentVisibility, isOwn, className = "" }) {
   if (!author) return null;
   return (
     <div className={`flex items-center gap-3 px-4 py-3 ${className}`}>
       <UserAvatar user={author} size="lg" />
-      <span className="text-sm font-semibold text-foreground">{author.name}</span>
+      <div className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold text-foreground">{author.name}</span>
+      </div>
       {isOwn && (
-        <PostOptionsMenu postId={postId} currentVisibility={currentVisibility} />
+        <div className="shrink-0">
+          <PostOptionsMenu postId={postId} currentVisibility={currentVisibility} />
+        </div>
       )}
     </div>
   );
@@ -58,6 +73,7 @@ function PostDetailPage() {
   const { user: currentUser } = useAuth();
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState(null);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const commentInputRef = useRef(null);
 
   const [showLikes, setShowLikes] = useState(false);
@@ -78,6 +94,19 @@ function PostDetailPage() {
   const { mutate: toggleCommentLike } = useToggleCommentLike(postId);
 
   const comments = commentsData?.pages.flatMap((p) => p.comments) ?? [];
+
+  useEffect(() => {
+    setCurrentMediaIndex(0);
+  }, [postId]);
+
+  useEffect(() => {
+    if (!post?.medias?.length) {
+      setCurrentMediaIndex(0);
+      return;
+    }
+
+    setCurrentMediaIndex((current) => Math.min(current, post.medias.length - 1));
+  }, [post?.medias]);
 
   function handleSubmitComment(e) {
     e.preventDefault();
@@ -122,6 +151,11 @@ function PostDetailPage() {
   }
 
   const isOwn = !!currentUser && !!post.author && currentUser.id === post.author.id;
+  const activeMedia = post.medias?.[currentMediaIndex] ?? post.medias?.[0] ?? null;
+  const activeMediaAspectRatio = getMediaAspectRatio(activeMedia);
+  const desktopCardStyle = {
+    gridTemplateColumns: `minmax(0, max(18rem, min(47.5rem, calc((100vh - 12rem) * ${activeMediaAspectRatio}), calc(100vw - 44rem)))) ${DESKTOP_SIDEBAR_WIDTH}px`,
+  };
 
   const commentInput = (
     <form onSubmit={handleSubmitComment} className="shrink-0 border-t border-border px-4 py-3">
@@ -162,20 +196,23 @@ function PostDetailPage() {
 
   return (
     <>
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-6xl lg:flex lg:h-[calc(100vh-5.5rem)] lg:flex-col">
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 flex shrink-0 items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </button>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card lg:grid lg:h-150 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div
+        className="w-full overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_80px_rgba(0,0,0,0.28)] lg:mx-auto lg:grid lg:min-h-0 lg:w-fit lg:flex-1"
+        style={desktopCardStyle}
+      >
 
         {/* LEFT column — media + mobile-only author row above it */}
-        <div className="flex flex-col lg:min-h-0 lg:border-r lg:border-border">
+        <div className="flex min-w-0 flex-col lg:min-h-0 lg:border-r lg:border-border">
           {/* Author row — mobile only, sits above the image */}
           <AuthorRow
             author={post.author}
@@ -185,7 +222,11 @@ function PostDetailPage() {
             className="shrink-0 border-b border-border lg:hidden"
           />
           <div className="flex-1 lg:min-h-0 lg:overflow-hidden">
-            <PostMediaCarousel medias={post.medias ?? []} />
+            <PostMediaCarousel
+              medias={post.medias ?? []}
+              current={currentMediaIndex}
+              onChange={setCurrentMediaIndex}
+            />
           </div>
           {/* Actions bar — mobile only, sits below the image */}
           <div className="shrink-0 border-t border-border lg:hidden">
@@ -199,7 +240,7 @@ function PostDetailPage() {
         </div>
 
         {/* RIGHT column — desktop only: author, scrollable area, actions, input */}
-        <div className="flex flex-col lg:min-h-0 lg:h-full">
+        <div className="flex min-h-0 flex-col lg:h-full">
           {/* Author row — desktop only, pinned at top */}
           <AuthorRow
             author={post.author}
@@ -210,7 +251,7 @@ function PostDetailPage() {
           />
 
           {/* Scrollable area: caption + comments (on mobile, page scrolls; on desktop, this div scrolls within h-150) */}
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3">
+          <div className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
             {post.caption && (
               <p className="text-sm text-foreground leading-relaxed">{post.caption}</p>
             )}
