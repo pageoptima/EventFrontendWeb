@@ -12,21 +12,21 @@ function PostMediaCarousel({ medias = [] }) {
   const isVideo = media?.type === "VIDEO";
 
   return (
-    <div className="relative flex items-center justify-center bg-black">
-      <div className="aspect-square w-full overflow-hidden lg:aspect-auto lg:h-full">
+    <div className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-card">
+      <div className="relative aspect-square w-full overflow-hidden lg:aspect-auto lg:h-full">
         {isVideo ? (
           <video
             key={media.url}
             src={media.url}
             controls
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain lg:object-cover"
           />
         ) : (
           <img
             key={media.url ?? current}
             src={media.url ?? undefined}
             alt={`Media ${current + 1}`}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain lg:object-cover"
           />
         )}
       </div>
@@ -37,7 +37,7 @@ function PostMediaCarousel({ medias = [] }) {
             <button
               type="button"
               onClick={() => setCurrent((c) => c - 1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -46,12 +46,12 @@ function PostMediaCarousel({ medias = [] }) {
             <button
               type="button"
               onClick={() => setCurrent((c) => c + 1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
           )}
-          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1.5">
             {medias.map((_, i) => (
               <button
                 key={i}

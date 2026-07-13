@@ -175,7 +175,7 @@ function PostDetailPage() {
       <div className="overflow-hidden rounded-2xl border border-border bg-card lg:grid lg:h-150 lg:grid-cols-[minmax(0,1fr)_360px]">
 
         {/* LEFT column — media + mobile-only author row above it */}
-        <div className="flex flex-col lg:border-r lg:border-border">
+        <div className="flex flex-col lg:min-h-0 lg:border-r lg:border-border">
           {/* Author row — mobile only, sits above the image */}
           <AuthorRow
             author={post.author}
@@ -184,7 +184,7 @@ function PostDetailPage() {
             isOwn={isOwn}
             className="shrink-0 border-b border-border lg:hidden"
           />
-          <div className="flex-1">
+          <div className="flex-1 lg:min-h-0 lg:overflow-hidden">
             <PostMediaCarousel medias={post.medias ?? []} />
           </div>
           {/* Actions bar — mobile only, sits below the image */}
@@ -199,7 +199,7 @@ function PostDetailPage() {
         </div>
 
         {/* RIGHT column — desktop only: author, scrollable area, actions, input */}
-        <div className="flex flex-col">
+        <div className="flex flex-col lg:min-h-0 lg:h-full">
           {/* Author row — desktop only, pinned at top */}
           <AuthorRow
             author={post.author}
