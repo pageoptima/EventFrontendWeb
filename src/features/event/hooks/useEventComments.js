@@ -1,40 +1,40 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getPostComments,
-  createPostComment,
+  getEventComments,
+  createEventComment,
   toggleCommentLike,
-} from "@/features/post/services/postService";
-import { postKeys } from "@/features/post/queryKeys";
+} from "@/features/event/services/eventService";
+import { eventKeys } from "@/features/event/eventQueryKeys";
 
-export function usePostComments(postId) {
+export function useEventComments(eventId) {
   return useInfiniteQuery({
-    queryKey: postKeys.comments(postId),
-    queryFn: ({ pageParam }) => getPostComments({ postId, cursor: pageParam }),
+    queryKey: eventKeys.comments(eventId),
+    queryFn: ({ pageParam }) => getEventComments({ eventId, cursor: pageParam }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined,
-    enabled: !!postId,
+    enabled: !!eventId,
   });
 }
 
-export function useCreateComment(postId) {
+export function useCreateComment(eventId) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ content, parentId }) => createPostComment({ postId, content, parentId }),
+    mutationFn: ({ content, parentId }) => createEventComment({ eventId, content, parentId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: postKeys.comments(postId) });
-      queryClient.setQueryData(postKeys.detail(postId), (old) =>
+      queryClient.invalidateQueries({ queryKey: eventKeys.comments(eventId) });
+      queryClient.setQueryData(eventKeys.detail(eventId), (old) =>
         old ? { ...old, commentCount: (old.commentCount ?? 0) + 1 } : old,
       );
     },
   });
 }
 
-export function useToggleCommentLike(postId) {
+export function useToggleCommentLike(eventId) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (commentId) => toggleCommentLike(commentId),
     onSuccess: (data, commentId) => {
-      queryClient.setQueryData(postKeys.comments(postId), (old) => {
+      queryClient.setQueryData(eventKeys.comments(eventId), (old) => {
         if (!old) return old;
         return {
           ...old,

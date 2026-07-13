@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle } from "lucide-react";
-import { usePost, useTogglePostLike } from "@/features/post/hooks/usePost";
-import { usePostComments, useCreateComment, useToggleCommentLike } from "@/features/post/hooks/usePostComments";
-import PostMediaCarousel from "@/features/post/components/PostMediaCarousel";
-import CommentItem from "@/features/post/components/CommentItem";
-import PostOptionsMenu from "@/features/post/components/PostOptionsMenu";
-import PostLikesModal from "@/features/post/components/PostLikesModal";
+import { useEvent, useToggleEventLike } from "@/features/event/hooks/useEvent";
+import { useEventComments, useCreateComment, useToggleCommentLike } from "@/features/event/hooks/useEventComments";
+import EventMediaCarousel from "@/features/event/components/EventMediaCarousel";
+import CommentItem from "@/features/event/components/CommentItem";
+import EventOptionsMenu from "@/features/event/components/EventOptionsMenu";
+import EventLikesModal from "@/features/event/components/EventLikesModal";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
@@ -21,7 +21,7 @@ function getMediaAspectRatio(media) {
   return width / height;
 }
 
-function AuthorRow({ author, postId, currentVisibility, isOwn, className = "" }) {
+function AuthorRow({ author, eventId, currentVisibility, isOwn, className = "" }) {
   if (!author) return null;
   return (
     <div className={`flex items-center gap-3 px-4 py-3 ${className}`}>
@@ -31,14 +31,14 @@ function AuthorRow({ author, postId, currentVisibility, isOwn, className = "" })
       </div>
       {isOwn && (
         <div className="shrink-0">
-          <PostOptionsMenu postId={postId} currentVisibility={currentVisibility} />
+          <EventOptionsMenu eventId={eventId} currentVisibility={currentVisibility} />
         </div>
       )}
     </div>
   );
 }
 
-function ActionsBar({ post, onToggleLike, isPending, onShowLikes }) {
+function ActionsBar({ event, onToggleLike, isPending, onShowLikes }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -48,27 +48,27 @@ function ActionsBar({ post, onToggleLike, isPending, onShowLikes }) {
         className="flex items-center gap-1.5 text-sm font-medium text-foreground"
       >
         <Heart
-          className={`h-5 w-5 transition ${post.likedByMe ? "fill-red-500 text-red-500" : ""}`}
+          className={`h-5 w-5 transition ${event.likedByMe ? "fill-red-500 text-red-500" : ""}`}
         />
       </button>
       <button
         type="button"
         onClick={onShowLikes}
-        disabled={(post.likeCount ?? 0) === 0}
+        disabled={(event.likeCount ?? 0) === 0}
         className="text-sm font-semibold text-foreground disabled:cursor-default"
       >
-        {post.likeCount ?? 0} {post.likeCount === 1 ? "like" : "likes"}
+        {event.likeCount ?? 0} {event.likeCount === 1 ? "like" : "likes"}
       </button>
       <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
         <MessageCircle className="h-5 w-5" />
-        {post.commentCount ?? 0}
+        {event.commentCount ?? 0}
       </span>
     </div>
   );
 }
 
-function PostDetailPage() {
-  const { postId } = useParams();
+function EventDetailPage() {
+  const { eventId } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [commentText, setCommentText] = useState("");
@@ -78,8 +78,8 @@ function PostDetailPage() {
 
   const [showLikes, setShowLikes] = useState(false);
 
-  const { data: post, isLoading, error } = usePost(postId);
-  const toggleLike = useTogglePostLike(postId);
+  const { data: event, isLoading, error } = useEvent(eventId);
+  const toggleLike = useToggleEventLike(eventId);
 
   const {
     data: commentsData,
@@ -88,25 +88,25 @@ function PostDetailPage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = usePostComments(postId);
+  } = useEventComments(eventId);
 
-  const createComment = useCreateComment(postId);
-  const { mutate: toggleCommentLike } = useToggleCommentLike(postId);
+  const createComment = useCreateComment(eventId);
+  const { mutate: toggleCommentLike } = useToggleCommentLike(eventId);
 
   const comments = commentsData?.pages.flatMap((p) => p.comments) ?? [];
 
   useEffect(() => {
     setCurrentMediaIndex(0);
-  }, [postId]);
+  }, [eventId]);
 
   useEffect(() => {
-    if (!post?.medias?.length) {
+    if (!event?.medias?.length) {
       setCurrentMediaIndex(0);
       return;
     }
 
-    setCurrentMediaIndex((current) => Math.min(current, post.medias.length - 1));
-  }, [post?.medias]);
+    setCurrentMediaIndex((current) => Math.min(current, event.medias.length - 1));
+  }, [event?.medias]);
 
   function handleSubmitComment(e) {
     e.preventDefault();
@@ -135,10 +135,10 @@ function PostDetailPage() {
     );
   }
 
-  if (error || !post) {
+  if (error || !event) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-3">
-        <p className="text-sm text-destructive">Failed to load post.</p>
+        <p className="text-sm text-destructive">Failed to load event.</p>
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -150,8 +150,8 @@ function PostDetailPage() {
     );
   }
 
-  const isOwn = !!currentUser && !!post.author && currentUser.id === post.author.id;
-  const activeMedia = post.medias?.[currentMediaIndex] ?? post.medias?.[0] ?? null;
+  const isOwn = !!currentUser && !!event.author && currentUser.id === event.author.id;
+  const activeMedia = event.medias?.[currentMediaIndex] ?? event.medias?.[0] ?? null;
   const activeMediaAspectRatio = getMediaAspectRatio(activeMedia);
   const desktopCardStyle = {
     gridTemplateColumns: `minmax(0, max(18rem, min(47.5rem, calc((100vh - 12rem) * ${activeMediaAspectRatio}), calc(100vw - 44rem)))) ${DESKTOP_SIDEBAR_WIDTH}px`,
@@ -215,15 +215,15 @@ function PostDetailPage() {
         <div className="flex min-w-0 flex-col lg:min-h-0 lg:border-r lg:border-border">
           {/* Author row — mobile only, sits above the image */}
           <AuthorRow
-            author={post.author}
-            postId={postId}
-            currentVisibility={post.visibility}
+            author={event.author}
+            eventId={eventId}
+            currentVisibility={event.visibility}
             isOwn={isOwn}
             className="shrink-0 border-b border-border lg:hidden"
           />
           <div className="flex-1 lg:min-h-0 lg:overflow-hidden">
-            <PostMediaCarousel
-              medias={post.medias ?? []}
+            <EventMediaCarousel
+              medias={event.medias ?? []}
               current={currentMediaIndex}
               onChange={setCurrentMediaIndex}
             />
@@ -231,7 +231,7 @@ function PostDetailPage() {
           {/* Actions bar — mobile only, sits below the image */}
           <div className="shrink-0 border-t border-border lg:hidden">
             <ActionsBar
-              post={post}
+              event={event}
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
@@ -243,22 +243,22 @@ function PostDetailPage() {
         <div className="flex min-h-0 flex-col lg:h-full">
           {/* Author row — desktop only, pinned at top */}
           <AuthorRow
-            author={post.author}
-            postId={postId}
-            currentVisibility={post.visibility}
+            author={event.author}
+            eventId={eventId}
+            currentVisibility={event.visibility}
             isOwn={isOwn}
             className="hidden shrink-0 border-b border-border lg:flex"
           />
 
           {/* Scrollable area: caption + comments (on mobile, page scrolls; on desktop, this div scrolls within h-150) */}
           <div className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
-            {post.caption && (
-              <p className="text-sm text-foreground leading-relaxed">{post.caption}</p>
+            {event.caption && (
+              <p className="text-sm text-foreground leading-relaxed">{event.caption}</p>
             )}
 
-            {post.tags?.length > 0 && (
+            {event.tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {post.tags.map((tag) => (
+                {event.tags.map((tag) => (
                   <Link
                     key={tag.id}
                     to={`/search?q=${encodeURIComponent(tag.name)}`}
@@ -308,7 +308,7 @@ function PostDetailPage() {
           {/* Actions bar — desktop only, pinned above comment input */}
           <div className="hidden shrink-0 border-t border-border lg:block">
             <ActionsBar
-              post={post}
+              event={event}
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
@@ -322,9 +322,9 @@ function PostDetailPage() {
     </div>
 
     {showLikes && (
-      <PostLikesModal
-        postId={postId}
-        likeCount={post.likeCount ?? 0}
+      <EventLikesModal
+        eventId={eventId}
+        likeCount={event.likeCount ?? 0}
         onClose={() => setShowLikes(false)}
       />
     )}
@@ -332,4 +332,4 @@ function PostDetailPage() {
   );
 }
 
-export default PostDetailPage;
+export default EventDetailPage;

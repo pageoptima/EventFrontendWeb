@@ -67,7 +67,7 @@ function TagInput({ tags, onAdd, onRemove }) {
   );
 }
 
-function PostDetailsForm({
+function EventDetailsForm({
   form,
   onFormChange,
   onAddTag,
@@ -177,10 +177,10 @@ function PostDetailsForm({
         )}
       >
         {isPublishing && <Loader2 className="h-4 w-4 animate-spin" />}
-        {isPublishing ? "Publishing…" : "Publish Post"}
+        {isPublishing ? "Publishing…" : "Publish Event"}
       </button>
     </div>
   );
 }
 
-export default PostDetailsForm;
+export default EventDetailsForm;

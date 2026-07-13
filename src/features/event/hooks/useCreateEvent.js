@@ -9,8 +9,8 @@ import {
   updateDraft,
   publishDraft,
   deleteDraftMedia,
-} from "@/features/post/services/postService";
-import { postKeys } from "@/features/post/queryKeys";
+} from "@/features/event/services/eventService";
+import { eventKeys } from "@/features/event/eventQueryKeys";
 import { getApiErrorMessage } from "@/shared/utils/errors";
 
 const MAX_FILES = 10;
@@ -36,7 +36,7 @@ function buildMediaItem(file, order) {
   };
 }
 
-export function useCreatePost() {
+export function useCreateEvent() {
   const queryClient = useQueryClient();
   const [draftId, setDraftId] = useState(null);
   const draftIdRef = useRef(null);
@@ -218,7 +218,7 @@ export function useCreatePost() {
         tags: form.tags,
       });
       await publishDraft(id);
-      queryClient.invalidateQueries({ queryKey: postKeys.userPosts("me") });
+      queryClient.invalidateQueries({ queryKey: eventKeys.userEvents("me") });
       setPublishState("success");
     } catch (err) {
       setPublishError(getApiErrorMessage(err));
@@ -241,7 +241,7 @@ export function useCreatePost() {
   }, [allUploadsDone]);
 
   const draftQuery = useQuery({
-    queryKey: postKeys.draft(draftId),
+    queryKey: eventKeys.draft(draftId),
     queryFn: () => getDraft(draftId),
     enabled: !!draftId && allUploadsDone && !processingTimedOut,
     staleTime: 0,

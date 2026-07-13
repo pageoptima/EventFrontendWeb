@@ -1,36 +1,36 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
-  getPost,
-  togglePostLike,
-  getPostLikes,
-  deletePost,
-  changePostVisibility,
-} from "@/features/post/services/postService";
-import { postKeys } from "@/features/post/queryKeys";
+  getEvent,
+  toggleEventLike,
+  getEventLikes,
+  deleteEvent,
+  changeEventVisibility,
+} from "@/features/event/services/eventService";
+import { eventKeys } from "@/features/event/eventQueryKeys";
 
-export function usePost(postId) {
+export function useEvent(eventId) {
   return useQuery({
-    queryKey: postKeys.detail(postId),
-    queryFn: () => getPost(postId),
-    enabled: !!postId,
+    queryKey: eventKeys.detail(eventId),
+    queryFn: () => getEvent(eventId),
+    enabled: !!eventId,
     staleTime: 45 * 60 * 1000,
   });
 }
 
-export function useTogglePostLike(postId) {
+export function useToggleEventLike(eventId) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => togglePostLike(postId),
+    mutationFn: () => toggleEventLike(eventId),
     onMutate: async () => {
       // Cancel in-flight refetches so they don't overwrite the optimistic update
-      await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) });
+      await queryClient.cancelQueries({ queryKey: eventKeys.detail(eventId) });
 
       // Snapshot current state for rollback
-      const previous = queryClient.getQueryData(postKeys.detail(postId));
+      const previous = queryClient.getQueryData(eventKeys.detail(eventId));
 
       // Immediately flip the UI
-      queryClient.setQueryData(postKeys.detail(postId), (old) => {
+      queryClient.setQueryData(eventKeys.detail(eventId), (old) => {
         if (!old) return old;
         const liked = !old.likedByMe;
         return {
@@ -45,55 +45,55 @@ export function useTogglePostLike(postId) {
     onError: (_err, _vars, context) => {
       // Revert to snapshot if API fails
       if (context?.previous !== undefined) {
-        queryClient.setQueryData(postKeys.detail(postId), context.previous);
+        queryClient.setQueryData(eventKeys.detail(eventId), context.previous);
       }
     },
     onSuccess: (data) => {
       // Sync with server truth (corrects any count discrepancy)
-      queryClient.setQueryData(postKeys.detail(postId), (old) =>
+      queryClient.setQueryData(eventKeys.detail(eventId), (old) =>
         old ? { ...old, likeCount: data.likeCount, likedByMe: data.liked } : old,
       );
     },
   });
 }
 
-export function usePostLikes(postId, { enabled = false } = {}) {
+export function useEventLikes(eventId, { enabled = false } = {}) {
   return useInfiniteQuery({
-    queryKey: postKeys.likes(postId),
+    queryKey: eventKeys.likes(eventId),
     queryFn: ({ pageParam }) =>
-      getPostLikes({
-        postId,
+      getEventLikes({
+        eventId,
         cursorUserId: pageParam?.userId,
         cursorCreatedAt: pageParam?.createdAt,
       }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined,
-    enabled: !!postId && enabled,
+    enabled: !!eventId && enabled,
   });
 }
 
-export function useDeletePost(postId) {
+export function useDeleteEvent(eventId) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: () => deletePost(postId),
+    mutationFn: () => deleteEvent(eventId),
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: postKeys.detail(postId) });
-      queryClient.invalidateQueries({ queryKey: postKeys.userPosts("me") });
+      queryClient.removeQueries({ queryKey: eventKeys.detail(eventId) });
+      queryClient.invalidateQueries({ queryKey: eventKeys.userEvents("me") });
       navigate(-1);
     },
   });
 }
 
-export function useChangePostVisibility(postId) {
+export function useChangeEventVisibility(eventId) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (visibility) => changePostVisibility(postId, visibility),
+    mutationFn: (visibility) => changeEventVisibility(eventId, visibility),
     onSuccess: (_, visibility) => {
-      queryClient.setQueryData(postKeys.detail(postId), (old) =>
+      queryClient.setQueryData(eventKeys.detail(eventId), (old) =>
         old ? { ...old, visibility } : old,
       );
-      queryClient.invalidateQueries({ queryKey: postKeys.userPosts("me") });
+      queryClient.invalidateQueries({ queryKey: eventKeys.userEvents("me") });
     },
   });
 }

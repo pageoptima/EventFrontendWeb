@@ -368,7 +368,7 @@ function ProfileDetailsSection({
             <span className="font-semibold text-foreground">
               {formatCount(postCount)}
             </span>{" "}
-            Posts
+            Events
           </p>
           <button
             type="button"

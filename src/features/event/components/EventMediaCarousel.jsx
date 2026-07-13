@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function PostMediaCarousel({ medias = [], current = 0, onChange }) {
+function EventMediaCarousel({ medias = [], current = 0, onChange }) {
   function setCurrent(nextIndex) {
     onChange?.(nextIndex);
   }
@@ -70,4 +70,4 @@ function PostMediaCarousel({ medias = [], current = 0, onChange }) {
   );
 }
 
-export default PostMediaCarousel;
+export default EventMediaCarousel;

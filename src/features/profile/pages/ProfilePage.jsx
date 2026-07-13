@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import RightSidebar from "@/shared/components/RightSidebar";
 import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsSection";
-import ProfilePostsSection from "@/features/profile/components/ProfilePostsSection";
+import ProfileEventsSection from "@/features/profile/components/ProfileEventsSection";
 import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
 import { useMyProfile } from "@/features/profile/hooks/useProfile";
 import { profileKeys } from "@/features/profile/queryKeys";
@@ -17,7 +17,7 @@ function ProfilePage() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { data: profile, isLoading, error, refetch } = useMyProfile();
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("events");
 
   const pictureMutation = useMutation({
     mutationFn: updateProfilePicture,
@@ -80,7 +80,7 @@ function ProfilePage() {
             uploadingCover={coverMutation.isPending}
             uploadError={uploadError}
           />
-          <ProfilePostsSection
+          <ProfileEventsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
             userId="me"

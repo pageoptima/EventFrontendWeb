@@ -8,7 +8,7 @@ import teaser7Img from "@/assets/images/posts/teaser7.svg";
 import teaser8Img from "@/assets/images/posts/teaser8.svg";
 import teaser1Video from "@/assets/teasers/teaser1.mp4";
 import teaser2Video from "@/assets/teasers/teaser2.mp4";
-import { events as eventConfigs } from "@/app/config/events";
+import { eventSuggestions as suggestedEvents } from "@/app/config/eventSuggestions";
 
 const teaserImages = [
   teaser1Img,
@@ -54,7 +54,7 @@ const teaserLikes = [
 ];
 const teaserComments = ["312", "198", "274", "143", "92", "217", "186", "128"];
 const teaserVideos = [teaser1Video, teaser2Video];
-const teaserLocations = eventConfigs.map((event) => ({
+const teaserLocations = suggestedEvents.map((event) => ({
   place: event.place,
   startDateTime: event.startDateTime,
 }));

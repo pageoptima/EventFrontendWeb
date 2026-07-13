@@ -1,17 +1,16 @@
 import { useRef, useEffect } from "react";
-import { Grid3X3, PlaySquare, ImageIcon } from "lucide-react";
+import { Grid3X3, PlaySquare } from "lucide-react";
 import GalleryCard from "@/features/profile/components/GalleryCard";
-import { useUserPosts } from "@/features/post/hooks/useUserPosts";
+import { useUserEvents } from "@/features/event/hooks/useUserEvents";
 
 const tabs = [
-  { key: "posts", label: "Posts", Icon: ImageIcon },
-  { key: "events", label: "Events", Icon: Grid3X3 },
+  { key: "events", label: "Event", Icon: Grid3X3 },
   { key: "teaser", label: "Teaser", Icon: PlaySquare },
 ];
 
-function PostsGrid({ userId }) {
+function EventsGrid({ userId }) {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useUserPosts(userId);
+    useUserEvents(userId);
   const loaderRef = useRef(null);
 
   useEffect(() => {
@@ -39,12 +38,12 @@ function PostsGrid({ userId }) {
     );
   }
 
-  const posts = data?.pages.flatMap((p) => p.posts) ?? [];
+  const events = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  if (posts.length === 0) {
+  if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-14 text-center">
-        <p className="text-sm text-muted-foreground">No posts yet.</p>
+        <p className="text-sm text-muted-foreground">No events yet.</p>
       </div>
     );
   }
@@ -52,8 +51,8 @@ function PostsGrid({ userId }) {
   return (
     <>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        {posts.map((post) => (
-          <GalleryCard key={post.id} post={post} />
+        {events.map((event) => (
+          <GalleryCard key={event.id} event={event} />
         ))}
       </div>
       <div ref={loaderRef} className="py-2">
@@ -67,10 +66,10 @@ function PostsGrid({ userId }) {
   );
 }
 
-function ProfilePostsSection({ activeTab, onTabChange, userId }) {
+function ProfileEventsSection({ activeTab, onTabChange, userId }) {
   return (
     <div className="border-t border-border px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -88,8 +87,8 @@ function ProfilePostsSection({ activeTab, onTabChange, userId }) {
         ))}
       </div>
 
-      {activeTab === "posts" ? (
-        <PostsGrid userId={userId} />
+      {activeTab === "events" ? (
+        <EventsGrid userId={userId} />
       ) : (
         <div className="flex flex-col items-center justify-center py-14 text-center">
           <p className="text-sm text-muted-foreground">No {activeTab} yet.</p>
@@ -99,4 +98,4 @@ function ProfilePostsSection({ activeTab, onTabChange, userId }) {
   );
 }
 
-export default ProfilePostsSection;
+export default ProfileEventsSection;

@@ -1,15 +1,15 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Loader2 } from "lucide-react";
-import { usePostLikes } from "@/features/post/hooks/usePost";
+import { useEventLikes } from "@/features/event/hooks/useEvent";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 
-function PostLikesModal({ postId, likeCount, onClose }) {
+function EventLikesModal({ eventId, likeCount, onClose }) {
   const navigate = useNavigate();
   const bottomRef = useRef(null);
 
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    usePostLikes(postId, { enabled: true });
+    useEventLikes(eventId, { enabled: true });
 
   const users = data?.pages.flatMap((p) => p.users) ?? [];
 
@@ -92,4 +92,4 @@ function PostLikesModal({ postId, likeCount, onClose }) {
   );
 }
 
-export default PostLikesModal;
+export default EventLikesModal;

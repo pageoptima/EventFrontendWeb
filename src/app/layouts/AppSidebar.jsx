@@ -4,14 +4,13 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import eventIcon from "@/assets/icons/event.svg";
 import plusIcon from "@/assets/icons/plus-black.svg";
-import { ImagePlus, Clapperboard, CalendarPlus } from "lucide-react";
+import { Clapperboard, CalendarPlus } from "lucide-react";
 import { sidebarMainItems } from "@/app/config/sidebar";
 import { useNotifications } from "@/features/notifications";
 
 const CREATE_OPTIONS = [
-  { label: "Post", Icon: ImagePlus, to: "/create-post" },
+  { label: "Event", Icon: CalendarPlus, to: "/create-event" },
   { label: "Teaser", Icon: Clapperboard, to: "/create-teaser" },
-  { label: "Event", Icon: CalendarPlus, to: "/create-live-event" },
 ];
 
 function CreateMenu({ onClose }) {

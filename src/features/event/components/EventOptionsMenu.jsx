@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { MoreHorizontal, Globe, Users, Lock, Loader2 } from "lucide-react";
-import { useDeletePost, useChangePostVisibility } from "@/features/post/hooks/usePost";
+import { useDeleteEvent, useChangeEventVisibility } from "@/features/event/hooks/useEvent";
 
 const VISIBILITY_OPTIONS = [
   {
     value: "PUBLIC",
     label: "Public",
-    description: "Anyone can see this post",
+    description: "Anyone can see this event",
     Icon: Globe,
   },
   {
     value: "FRIENDS",
     label: "Friends",
-    description: "Only your friends can see this post",
+    description: "Only your friends can see this event",
     Icon: Users,
   },
   {
     value: "PRIVATE",
     label: "Private",
-    description: "Only you can see this post",
+    description: "Only you can see this event",
     Icon: Lock,
   },
 ];
@@ -45,7 +45,7 @@ function MenuView({ currentVisibility, onVisibility, onDelete, onClose }) {
   return (
     <>
       <div className="border-b border-border px-4 py-3 text-center">
-        <p className="text-sm font-semibold text-foreground">Post options</p>
+        <p className="text-sm font-semibold text-foreground">Event options</p>
       </div>
       <button
         type="button"
@@ -60,7 +60,7 @@ function MenuView({ currentVisibility, onVisibility, onDelete, onClose }) {
         onClick={onDelete}
         className="w-full border-b border-border px-4 py-4 text-sm font-medium text-destructive hover:bg-muted/60"
       >
-        Delete post
+        Delete event
       </button>
       <button
         type="button"
@@ -73,9 +73,9 @@ function MenuView({ currentVisibility, onVisibility, onDelete, onClose }) {
   );
 }
 
-function VisibilityView({ currentVisibility, postId, onBack, onClose }) {
+function VisibilityView({ currentVisibility, eventId, onBack, onClose }) {
   const [selected, setSelected] = useState(currentVisibility ?? "PUBLIC");
-  const { mutate, isPending } = useChangePostVisibility(postId);
+  const { mutate, isPending } = useChangeEventVisibility(eventId);
 
   function handleSave() {
     if (selected === currentVisibility) {
@@ -147,17 +147,17 @@ function VisibilityView({ currentVisibility, postId, onBack, onClose }) {
   );
 }
 
-function DeleteConfirmView({ postId, onBack, onClose }) {
-  const { mutate, isPending } = useDeletePost(postId);
+function DeleteConfirmView({ eventId, onBack, onClose }) {
+  const { mutate, isPending } = useDeleteEvent(eventId);
 
   return (
     <>
       <div className="border-b border-border px-4 py-3 text-center">
-        <p className="text-sm font-semibold text-foreground">Delete post?</p>
+        <p className="text-sm font-semibold text-foreground">Delete event?</p>
       </div>
       <div className="px-4 py-4 text-center">
         <p className="text-sm text-muted-foreground">
-          This will permanently delete your post. This action cannot be undone.
+          This will permanently delete your event. This action cannot be undone.
         </p>
       </div>
       <div className="flex gap-3 border-t border-border px-4 py-3">
@@ -183,7 +183,7 @@ function DeleteConfirmView({ postId, onBack, onClose }) {
   );
 }
 
-function PostOptionsMenu({ postId, currentVisibility }) {
+function EventOptionsMenu({ eventId, currentVisibility }) {
   const [view, setView] = useState(null); // null | "menu" | "visibility" | "delete"
 
   if (!view) {
@@ -192,7 +192,7 @@ function PostOptionsMenu({ postId, currentVisibility }) {
         type="button"
         onClick={() => setView("menu")}
         className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-        aria-label="Post options"
+        aria-label="Event options"
       >
         <MoreHorizontal className="h-5 w-5" />
       </button>
@@ -205,7 +205,7 @@ function PostOptionsMenu({ postId, currentVisibility }) {
         type="button"
         onClick={() => setView("menu")}
         className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-        aria-label="Post options"
+        aria-label="Event options"
       >
         <MoreHorizontal className="h-5 w-5" />
       </button>
@@ -222,14 +222,14 @@ function PostOptionsMenu({ postId, currentVisibility }) {
         {view === "visibility" && (
           <VisibilityView
             currentVisibility={currentVisibility}
-            postId={postId}
+            eventId={eventId}
             onBack={() => setView("menu")}
             onClose={() => setView(null)}
           />
         )}
         {view === "delete" && (
           <DeleteConfirmView
-            postId={postId}
+            eventId={eventId}
             onBack={() => setView("menu")}
             onClose={() => setView(null)}
           />
@@ -239,4 +239,4 @@ function PostOptionsMenu({ postId, currentVisibility }) {
   );
 }
 
-export default PostOptionsMenu;
+export default EventOptionsMenu;

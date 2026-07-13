@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import RightSidebar from "@/shared/components/RightSidebar";
 import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsSection";
-import ProfilePostsSection from "@/features/profile/components/ProfilePostsSection";
+import ProfileEventsSection from "@/features/profile/components/ProfileEventsSection";
 import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
 import { useUserProfile } from "@/features/profile/hooks/useProfile";
 import { useFriendActions } from "@/features/friend/hooks/useFriendActions";
@@ -11,7 +11,7 @@ function UserProfilePage() {
   const { id } = useParams();
   const { data: profile, isLoading, error } = useUserProfile(id);
   const actions = useFriendActions(id);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("events");
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -48,7 +48,7 @@ function UserProfilePage() {
             friendActionPending={actions.isPending}
             profileUserId={id}
           />
-          <ProfilePostsSection
+          <ProfileEventsSection
             activeTab={activeTab}
             onTabChange={setActiveTab}
             userId={profile.id}

@@ -1,83 +1,121 @@
-import event1 from "@/assets/images/posts/event1.svg";
-import event2 from "@/assets/images/posts/event2.svg";
-import event3 from "@/assets/images/posts/event3.svg";
-import event4 from "@/assets/images/posts/event4.svg";
-import event5 from "@/assets/images/posts/event5.svg";
-import event6 from "@/assets/images/posts/event6.png";
-import event7 from "@/assets/images/posts/event7.png";
-import event8 from "@/assets/images/posts/event8.png";
+import post1 from "@/assets/images/posts/post1.png";
+import post2 from "@/assets/images/posts/post2.png";
+import post3 from "@/assets/images/posts/post3.png";
+import post4 from "@/assets/images/posts/post4.png";
+import post5 from "@/assets/images/posts/post5.png";
+import post6 from "@/assets/images/posts/post6.png";
+import post7 from "@/assets/images/posts/post7.png";
+import post8 from "@/assets/images/posts/post8.png";
+import post9 from "@/assets/images/posts/post9.png";
+import post10 from "@/assets/images/posts/post10.png";
+import post11 from "@/assets/images/posts/post11.png";
+import post12 from "@/assets/images/posts/post12.png";
+import post13 from "@/assets/images/posts/post13.png";
+import post15 from "@/assets/images/posts/post15.png";
+import post16 from "@/assets/images/posts/post16.png";
 
-export const events = [
-  {
-    id: "event-1",
-    userId: "user-001",
-    name: "Sunset Flight Meetup",
-    place: "Rooftop YC",
-    startDateTime: "2026-03-04T19:00:00",
-    likes: "2.4k",
-    image: event1,
-  },
-  {
-    id: "event-2",
-    userId: "user-002",
-    name: "Live Stage Nights",
-    place: "The Arena, LA",
-    startDateTime: "2026-03-07T18:30:00",
-    likes: "1.7k",
-    image: event2,
-  },
-  {
-    id: "event-3",
-    userId: "user-003",
-    name: "Festival Confetti",
-    place: "Green Park, SF",
-    startDateTime: "2026-03-10T20:00:00",
-    likes: "3.1k",
-    image: event3,
-  },
-  {
-    id: "event-4",
-    userId: "user-004",
-    name: "Neon Dance Party",
-    place: "Pulse Club, Miami",
-    startDateTime: "2026-03-14T17:30:00",
-    likes: "2.9k",
-    image: event4,
-  },
-  {
-    id: "event-5",
-    userId: "user-005",
-    name: "Color Lights Gala",
-    place: "Grand Hall, Chicago",
-    startDateTime: "2026-03-18T19:30:00",
-    likes: "4.2k",
-    image: event5,
-  },
-  {
-    id: "event-6",
-    userId: "user-006",
-    name: "City Skyline Tour",
-    place: "Heliport, NYC",
-    startDateTime: "2026-03-22T18:00:00",
-    likes: "2.2k",
-    image: event6,
-  },
-  {
-    id: "event-7",
-    userId: "user-007",
-    name: "Blue Portrait Night",
-    place: "Studio 7, Austin",
-    startDateTime: "2026-03-26T16:00:00",
-    likes: "1.9k",
-    image: event7,
-  },
-  {
-    id: "event-8",
-    userId: "user-008",
-    name: "Acoustic Purple",
-    place: "Kolkata, India",
-    startDateTime: "2026-03-30T19:15:00",
-    likes: "3.7k",
-    image: event8,
-  },
+const eventImages = [
+  post1,
+  post2,
+  post3,
+  post4,
+  post5,
+  post6,
+  post7,
+  post8,
+  post9,
+  post10,
+  post11,
+  post12,
+  post13,
+  post15,
+  post16,
 ];
+
+const likeCounts = [
+  "20k",
+  "14.2k",
+  "9.8k",
+  "12.4k",
+  "7.1k",
+  "18.6k",
+  "5.9k",
+  "21k",
+  "10.3k",
+  "6.7k",
+  "15.4k",
+  "8.2k",
+  "11.9k",
+  "4.8k",
+  "13.5k",
+];
+
+const commentCounts = [
+  "343",
+  "210",
+  "98",
+  "412",
+  "76",
+  "389",
+  "54",
+  "468",
+  "132",
+  "64",
+  "203",
+  "117",
+  "189",
+  "51",
+  "240",
+];
+
+const viewCounts = [
+  "52k",
+  "38.4k",
+  "27.9k",
+  "44.1k",
+  "19.6k",
+  "61.2k",
+  "15.3k",
+  "72.8k",
+  "33.7k",
+  "22.5k",
+  "48.9k",
+  "29.4k",
+  "36.1k",
+  "14.8k",
+  "41.6k",
+];
+
+const descriptions = [
+  "Sunset flight views and travel inspo Kolkata.",
+  "Live stage moments from last weekend's India concert.",
+  "Crowd energy and confetti at the festival.",
+  "Neon lights and dance floor highlights.",
+  "Abstract color study captured at a set.",
+  "City skyline from a high vantage point.",
+  "Portrait from the blue-lit photo booth.",
+  "Vocal performance captured mid-verse.",
+  "Rooftop gathering and skyline vibes.",
+  "Acoustic set with intimate crowd.",
+  "Behind-the-scenes of the event setup.",
+  "Crowd reaction during the chorus.",
+  "Street-level city exploration photos.",
+  "Indie artist promo shot.",
+  "Candid moment from last night's show.",
+];
+
+export const feedEvents = eventImages.map((image, index) => {
+  const userId = String(index + 1).padStart(3, "0");
+  return {
+    id: `event-${index + 1}`,
+    image,
+    user: {
+      name: `user_id${userId}`,
+      handle: `@user_id${userId}`,
+    },
+    description: descriptions[index % descriptions.length],
+    likes: likeCounts[index % likeCounts.length],
+    comments: commentCounts[index % commentCounts.length],
+    views: viewCounts[index % viewCounts.length],
+  };
+});
