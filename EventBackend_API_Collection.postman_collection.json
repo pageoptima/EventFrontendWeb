@@ -1,0 +1,2697 @@
+{
+  "info": {
+    "_postman_id": "event-backend-api-collection",
+    "name": "EventBackend API",
+    "description": "Complete API collection for the EventBackend — an Instagram-like event social platform.\n\n## Setup\n1. Import this collection and the accompanying **EventBackend Environment**.\n2. Set `baseUrl` to your running server (e.g. `http://localhost:3000`).\n3. After calling **Register** or **Login**, the `accessToken` variable is automatically saved and used by all protected routes.\n\n## Auth\nAll endpoints except **Health** and **Auth** require a valid JWT Bearer token unless marked *Public*.\n\n## Folder Structure\n- 🏥 Health\n- 🔐 Auth\n- 🖼️ Media\n- 👤 Profile\n- 🤝 Friends / Friend Requests\n- 🚫 Block\n- 👤 Users\n- 📍 Locations\n- 📝 Posts",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL of the EventBackend server"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT Bearer token — auto-populated after Register or Login"
+    },
+    {
+      "key": "mediaId",
+      "value": "",
+      "type": "string",
+      "description": "Media ID returned from Create Upload Request — used in Complete Upload"
+    },
+    {
+      "key": "uploadUrl",
+      "value": "",
+      "type": "string",
+      "description": "Signed S3 URL returned from Create Upload Request — used to PUT the file"
+    },
+    {
+      "key": "friendRequestId",
+      "value": "",
+      "type": "string",
+      "description": "Friend request ID — auto-populated after Send Friend Request"
+    },
+    {
+      "key": "targetUserId",
+      "value": "",
+      "type": "string",
+      "description": "A target user ID for friend / block operations"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string",
+      "description": "Post ID — auto-populated after Create Draft Post"
+    },
+    {
+      "key": "locationId",
+      "value": "",
+      "type": "string",
+      "description": "Location ID — auto-populated after Upsert Location"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string",
+      "description": "Comment ID — auto-populated after Create Comment"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health",
+      "description": "Public health-check endpoints — no authentication required.",
+      "item": [
+        {
+          "name": "Root Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "**Public** — Returns server status. Useful for uptime monitoring."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"ok\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "**Public** — Dedicated health endpoint."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"ok\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication endpoints — all public (no token required).\n\nThe **Register**, **Login**, and **Admin Login** requests automatically save `accessToken` to the collection variable so subsequent requests are authorized.",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "    console.log('accessToken saved:', json.accessToken.substring(0, 20) + '...');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"StrongPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Public** — Create a new user account.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `name` | string | Yes | 2–50 characters |\n| `email` | string | Yes | Valid email format |\n| `password` | string | Yes | 3–100 characters |\n\n### Notes\n- On success, the `accessToken` is automatically saved to `{{accessToken}}`.\n- Returns **409** if the email is already registered."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\"name must be longer than or equal to 2 characters\"],\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 Email Already Registered",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Email already registered\",\n  \"error\": \"Conflict\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "    console.log('accessToken saved:', json.accessToken.substring(0, 20) + '...');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"StrongPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Public** — Authenticate an existing user.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `email` | string | Yes | Valid email format |\n| `password` | string | Yes | 3–100 characters |\n\n### Notes\n- On success, the `accessToken` is automatically saved to `{{accessToken}}`.\n- Returns **401** for invalid credentials."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "401 Invalid Credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Invalid credentials\",\n  \"error\": \"Unauthorized\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "    console.log('Admin accessToken saved:', json.accessToken.substring(0, 20) + '...');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "admin-login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Public** — Authenticate as an administrator.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `email` | string | Yes | Valid email format |\n| `password` | string | Yes | 3–100 characters |\n\n### Notes\n- Returns **401** if the user does not have admin role.\n- On success, the `accessToken` is automatically saved to `{{accessToken}}`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "401 Not Admin",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"User is not admin\",\n  \"error\": \"Unauthorized\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🖼️ Media",
+      "description": "Two-step file upload flow:\n1. **Create Upload Request** → get a signed S3 URL and `mediaId`.\n2. **PUT** the file binary directly to the signed S3 URL (outside this API).\n3. **Complete Upload** → confirm the upload and finalize the media record.",
+      "item": [
+        {
+          "name": "Create Upload Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.mediaId) pm.collectionVariables.set('mediaId', json.mediaId);",
+                  "  if (json.uploadUrl) pm.collectionVariables.set('uploadUrl', json.uploadUrl);",
+                  "  console.log('mediaId saved:', json.mediaId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/media/upload-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                "upload-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mediaType\": \"IMAGE\",\n  \"mimeType\": \"image/jpeg\",\n  \"fileName\": \"photo.jpg\",\n  \"size\": 204800\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Step 1 of the upload flow. Returns a pre-signed S3 URL valid for direct upload.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaType` | `\"IMAGE\"` \\| `\"VIDEO\"` | Yes | Enum |\n| `mimeType` | string | Yes | Images: `image/jpeg`, `image/png`, `image/webp` · Videos: `video/mp4`, `video/webm`, `video/quicktime` |\n| `fileName` | string | Yes | Original file name |\n| `size` | number | Yes | File size in bytes, max 1 GB (1073741824) |\n\n### Next Steps\nAfter getting `uploadUrl`, PUT the raw file binary to that URL using your HTTP client or the browser."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"key\": \"uploads/tmp/uuid-photo.jpg\",\n  \"mediaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"uploadUrl\": \"https://s3.amazonaws.com/bucket/uploads/tmp/uuid-photo.jpg?X-Amz-Signature=...\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Invalid Mime Type",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Invalid image mime type\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Size Exceeded",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Size exceeds 1 GB\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Complete Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/media/complete-upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                "complete-upload"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mediaId\": \"{{mediaId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Step 3 of the upload flow. Call this after the file has been PUT to the signed S3 URL to verify and finalize the upload.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaId` | string (UUID) | Yes | Returned from *Create Upload Request* |\n\n### Validations Performed\n- Verifies file exists in S3\n- Checks file is non-empty\n- Validates size matches declared size\n- Validates MIME type matches declared MIME type"
+          },
+          "response": [
+            {
+              "name": "200 OK — Uploaded",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"status\": \"UPLOADED\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 File Size Mismatch",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"File size mismatch\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "403 Access Denied",
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Access denied\",\n  \"error\": \"Forbidden\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Profile",
+      "description": "User profile management endpoints.",
+      "item": [
+        {
+          "name": "Update Profile Picture",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/profile/picture",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "picture"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Image file (JPEG, PNG, or WebP). Required.",
+                  "src": []
+                }
+              ]
+            },
+            "description": "**Protected** — Upload and set the authenticated user's profile picture.\n\n### Request Body (multipart/form-data)\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `image` | file | Yes | Must be an image (JPEG, PNG, WebP) |\n\n### Notes\n- Do **not** set `Content-Type` manually — Postman sets the correct `multipart/form-data` boundary automatically.\n- The image is uploaded to S3 and the public URL is returned."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"profilePicture\": \"https://cdn.example.com/profiles/user-uuid.jpg\",\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 No Image Provided",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Image is required\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Invalid File Type",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Invalid image (non-image mimetype)\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Cover Picture",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/profile/cover-picture",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "cover-picture"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Image file (JPEG, PNG, or WebP). Required.",
+                  "src": []
+                }
+              ]
+            },
+            "description": "**Protected** — Upload and set the authenticated user's cover picture. Resized to 1536×512 and converted to WebP.\n\n### Request Body (multipart/form-data)\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `image` | file | Yes | Must be an image (JPEG, PNG, WebP) |\n\n### Notes\n- Do **not** set `Content-Type` manually — Postman sets the correct `multipart/form-data` boundary automatically."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"coverPicture\": \"https://cdn.example.com/profiles/user-uuid-cover.webp\",\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 No Image Provided",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Image is required\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Invalid File Type",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Invalid image\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/profile/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "me"
+              ]
+            },
+            "description": "**Protected** — Returns the authenticated user's own full profile including email, bio, picture URLs, post count, and friend count."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"bio\": \"Hello world!\",\n  \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n  \"coverPicture\": \"https://cdn.example.com/profiles/jane-cover.webp\",\n  \"joinedAt\": \"2024-01-01T00:00:00.000Z\",\n  \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\",\n  \"postCount\": 12,\n  \"friendCount\": 34\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/profile/{{targetUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "{{targetUserId}}"
+              ]
+            },
+            "description": "**Protected** — Returns the public profile of any user by ID. Includes relationship metadata. Sensitive fields are hidden when the viewer is blocked by the target.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `userId` | string (UUID) | Yes | The target user's ID |\n\n### Relationship Object\n| Field | Type | Description |\n|-------|------|-------------|\n| `isFriend` | boolean | True if already friends |\n| `isBlocked` | boolean | True if current user blocked the target |\n| `requestSent` | boolean | True if current user sent a pending request |\n| `requestReceived` | boolean | True if target sent current user a pending request |\n| `canMessage` | boolean | True if messaging is allowed |\n| `requestId` | string \\| null | ID of the pending friend request (sent or received), null if none |\n\n### Notes\n- Returns **404** if the user doesn't exist.\n- When blocked by target: bio, pictures, counts are all null."
+          },
+          "response": [
+            {
+              "name": "200 OK — Full Profile",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n  \"name\": \"Alice Wonder\",\n  \"bio\": \"Explorer\",\n  \"profilePicture\": \"https://cdn.example.com/profiles/alice.webp\",\n  \"coverPicture\": null,\n  \"lastActiveAt\": \"2024-01-15T10:00:00.000Z\",\n  \"postCount\": 5,\n  \"friendCount\": 20,\n  \"isMe\": false,\n  \"relationship\": {\n    \"isFriend\": true,\n    \"isBlocked\": false,\n    \"requestSent\": false,\n    \"requestReceived\": false,\n    \"canMessage\": true,\n    \"requestId\": null\n  }\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "200 OK — Blocked (hidden fields)",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n  \"name\": \"Alice Wonder\",\n  \"bio\": null,\n  \"profilePicture\": null,\n  \"coverPicture\": null,\n  \"lastActiveAt\": null,\n  \"postCount\": null,\n  \"friendCount\": null,\n  \"isMe\": false,\n  \"relationship\": {\n    \"isFriend\": false,\n    \"isBlocked\": true,\n    \"requestSent\": false,\n    \"requestReceived\": false,\n    \"canMessage\": false,\n    \"requestId\": null\n  }\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "404 User Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🤝 Friends",
+      "description": "Friend management — requests, acceptance, removal, and friend list viewing.",
+      "item": [
+        {
+          "name": "Friend Requests",
+          "description": "Send, accept, and delete/reject friend requests.",
+          "item": [
+            {
+              "name": "Send Friend Request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Helper: If you want to auto-capture a request ID from a list endpoint,",
+                      "// set it manually in {{friendRequestId}} collection variable."
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/friend/request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "request"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"receiverId\": \"{{targetUserId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Send a friend request to another user.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `receiverId` | string (UUID) | Yes | Target user's ID |\n\n### Notes\n- If the receiver already sent a request to the sender, the friendship is automatically established (`autoAccepted: true`).\n- Returns **409** if already friends or request already pending.\n- Returns **400** if the receiver has blocked the sender (or vice versa)."
+              },
+              "response": [
+                {
+                  "name": "201 Created",
+                  "status": "Created",
+                  "code": 201,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "201 Auto-Accepted (Mutual Request)",
+                  "status": "Created",
+                  "code": 201,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"autoAccepted\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "409 Already Friends",
+                  "status": "Conflict",
+                  "code": 409,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Already friends\",\n  \"error\": \"Conflict\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Receiver Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Receiver not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Accept Friend Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/friend/request/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "request",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requestId\": \"{{friendRequestId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Accept a pending incoming friend request. Only the **receiver** of the request can accept it.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `requestId` | string (UUID) | Yes | ID of the friend request (from *Get Incoming Requests*) |\n\n### Notes\n- Returns **403** if the authenticated user is not the receiver of the request.\n- Returns **409** if the users are already friends."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not the Receiver",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"User is not the receiver\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Request Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Friend request not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Delete / Reject Friend Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/friend/request/delete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "request",
+                    "delete"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requestId\": \"{{friendRequestId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Cancel or reject a friend request depending on the caller's role.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `requestId` | string (UUID) | Yes | ID of the friend request |\n\n### Notes\n- If called by the **sender** → cancels the request (`action: \"cancelled\"`).\n- If called by the **receiver** → rejects the request (`action: \"rejected\"`).\n- Returns **403** if the caller is neither the sender nor the receiver."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Cancelled (by sender)",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"action\": \"cancelled\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Rejected (by receiver)",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"action\": \"rejected\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Forbidden",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"User cannot modify this request\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Incoming Friend Requests",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/friend/request/incoming",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "request",
+                    "incoming"
+                  ]
+                },
+                "description": "**Protected** — List all pending friend requests received by the authenticated user.\n\n### Notes\n- Copy a request `id` from the response and save it to `{{friendRequestId}}` to use with Accept or Delete endpoints."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "[\n  {\n    \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"sender\": {\n      \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n      \"name\": \"John Smith\",\n      \"profilePicture\": \"https://cdn.example.com/profiles/john.jpg\"\n    }\n  }\n]",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Outgoing Friend Requests",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/friend/request/outgoing",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "request",
+                    "outgoing"
+                  ]
+                },
+                "description": "**Protected** — List all pending friend requests sent by the authenticated user."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "[\n  {\n    \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n    \"createdAt\": \"2024-01-15T09:00:00.000Z\",\n    \"receiver\": {\n      \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n      \"name\": \"Alice Wonder\",\n      \"profilePicture\": null\n    }\n  }\n]",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Friend List",
+          "description": "View and manage the friends list.",
+          "item": [
+            {
+              "name": "Get My Friends",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/friend/friendlist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "friendlist"
+                  ]
+                },
+                "description": "**Protected** — Return the authenticated user's complete friends list with friendship metadata."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "[\n  {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"name\": \"John Smith\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/john.jpg\",\n    \"friendshipId\": \"1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed\",\n    \"friendsSince\": \"2024-01-10T08:00:00.000Z\",\n    \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n  }\n]",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get User's Friends",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/friend/user/{{targetUserId}}/friendlist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "user",
+                    "{{targetUserId}}",
+                    "friendlist"
+                  ]
+                },
+                "description": "**Protected** — Return the friend list of any user by their ID. Includes `isMutual` flag to indicate whether the caller is also friends with each person.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `userId` | string (UUID) | Yes | The target user's ID |\n\n### Notes\n- Returns **404** if the target user doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "[\n  {\n    \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n    \"name\": \"Alice Wonder\",\n    \"profilePicture\": null,\n    \"friendshipId\": \"6ba7b810-9dad-11d1-80b4-00c04fd430c8\",\n    \"friendsSince\": \"2024-01-12T11:00:00.000Z\",\n    \"lastActiveAt\": null,\n    \"isMutual\": true\n  }\n]",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 User Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Remove Friend",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/friend/delete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "friend",
+                    "delete"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"friendId\": \"{{targetUserId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Remove an existing friendship with another user.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `friendId` | string (UUID) | Yes | The friend's user ID |\n\n### Notes\n- Returns **409** if trying to remove yourself or if you're not friends."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "409 Not Friends",
+                  "status": "Conflict",
+                  "code": 409,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Users are not friends\",\n  \"error\": \"Conflict\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🚫 Block",
+      "description": "User blocking and unblocking. Blocking a user also removes any existing friendship or pending requests.",
+      "item": [
+        {
+          "name": "Block User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/friend/block",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "block"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blockedId\": \"{{targetUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Block a user. Removes any existing friendship or pending friend request.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `blockedId` | string (UUID) | Yes | The user to block |\n\n### Notes\n- Returns **400** if trying to block yourself.\n- Returns **409** if the user is already blocked."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Cannot Block Yourself",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Cannot block yourself\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 Already Blocked",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"User already blocked\",\n  \"error\": \"Conflict\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Unblock User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/friend/unblock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "unblock"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blockedId\": \"{{targetUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Remove a block placed on a user.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `blockedId` | string (UUID) | Yes | The user to unblock |\n\n### Notes\n- Returns **409** if the user is not currently blocked."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 User Not Blocked",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"User is not blocked\",\n  \"error\": \"Conflict\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get Block List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/friend/blocklist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "blocklist"
+              ]
+            },
+            "description": "**Protected** — Return the list of all users the authenticated user has blocked."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n    \"name\": \"Bad Actor\",\n    \"profilePicture\": null,\n    \"lastActiveAt\": \"2024-01-14T18:00:00.000Z\",\n    \"blockId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"blockedAt\": \"2024-01-15T12:00:00.000Z\"\n  }\n]",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Users",
+      "description": "User search and discovery.",
+      "item": [
+        {
+          "name": "Search Users",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/search?q=jane&limit=20&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "jane",
+                  "description": "Search term matched against user name (case-insensitive, max 100 chars)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Page size — 1 to 50, default 20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset — default 0"
+                }
+              ]
+            },
+            "description": "**Public** — Search users by name.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `q` | string | Yes | Max 100 characters |\n| `limit` | integer | No | 1–50, default 20 |\n| `offset` | integer | No | ≥ 0, default 0 |"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"users\": [\n    {\n      \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n      \"name\": \"Jane Doe\",\n      \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n      \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"limit\": 20,\n  \"offset\": 0,\n  \"hasMore\": false\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\"q must be shorter than or equal to 100 characters\"],\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📍 Locations",
+      "description": "Create, deduplicate, and retrieve location entities for event-style posts.",
+      "item": [
+        {
+          "name": "Upsert Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.locationId) {",
+                  "    pm.collectionVariables.set('locationId', json.locationId);",
+                  "    console.log('locationId saved:', json.locationId);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/locations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 28.6129,\n  \"longitude\": 77.2295,\n  \"name\": \"India Gate\",\n  \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n  \"country\": \"India\",\n  \"state\": \"Delhi\",\n  \"locality\": \"New Delhi\",\n  \"postal_code\": \"110001\",\n  \"provider\": \"google\",\n  \"metadata\": {\n    \"place_id\": \"ChIJL_P_CXMEDTkRw0ZdG-0GVvw\",\n    \"formatted_address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Create or deduplicate a location using rounded coordinates. Saves `locationId` to `{{locationId}}`.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `latitude` | number | Yes | Decimal latitude |\n| `longitude` | number | Yes | Decimal longitude |\n| `name` | string | No | Human-readable place name |\n| `address` | string | No | Formatted address |\n| `country` | string | No | Country name |\n| `state` | string | No | State / region |\n| `locality` | string | No | City / locality |\n| `postal_code` | string | No | Postal code |\n| `provider` | string | Yes | One of: `google`, `nominatim`, `mapbox`, `user_generated` |\n| `metadata` | object | Yes | Raw provider-specific metadata |\n\n### Notes\n- The backend rounds coordinates to 6 decimal places for deduplication.\n- On success, returns the canonical `locationId` and whether the location already existed."
+          },
+          "response": [
+            {
+              "name": "201 Created — New Location",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"locationId\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n  \"existed\": false\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "201 Created — Existing Location",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"locationId\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n  \"existed\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"provider must be one of the following values: google, nominatim, mapbox, user_generated\"\n  ],\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get Location By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/locations/{{locationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "locations",
+                "{{locationId}}"
+              ]
+            },
+            "description": "**Protected** — Retrieve a location by ID.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `locationId` | string (UUID) | Yes | Location ID returned by **Upsert Location** |"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n  \"latitude\": 28.6129,\n  \"longitude\": 77.2295,\n  \"name\": \"India Gate\",\n  \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n  \"country\": \"India\",\n  \"state\": \"Delhi\",\n  \"locality\": \"New Delhi\",\n  \"postal_code\": \"110001\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "404 Location Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Location not found\",\n  \"error\": \"Not Found\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📝 Posts",
+      "description": "Post lifecycle: draft creation, media attachment, publishing, and engagement (likes & comments).\n\n## Draft Workflow\n1. **Create Draft** → get `postId`.\n2. **Add Media** → upload file to signed URL, then call `POST /media/complete-upload`.\n3. **Optionally Upsert Location** → get `locationId` from `POST /locations`.\n4. **Update Draft** → set caption, visibility, tags, location, and event timeline.\n5. **Publish Draft** → all media must be `READY`.",
+      "item": [
+        {
+          "name": "Drafts",
+          "description": "Create and manage draft posts before publishing.",
+          "item": [
+            {
+              "name": "Create Draft Post",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('postId', json.id);",
+                      "    console.log('postId saved:', json.id);",
+                      "  }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts"
+                  ]
+                },
+                "description": "**Protected** — Create a new draft post. If a draft already exists for the user, that existing draft is returned instead. Automatically saves the returned `id` to `{{postId}}`.\n\n### Notes\n- One active draft per user at a time.\n- The draft must have at least one media in `READY` status before it can be published."
+              },
+              "response": [
+                {
+                  "name": "201 Created",
+                  "status": "Created",
+                  "code": 201,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"DRAFT\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Draft Post",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts/{{postId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts",
+                    "{{postId}}"
+                  ]
+                },
+                "description": "**Protected** — Retrieve the full state of a draft post, including attached media, linked location, event timeline, and `canPublish` flag.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `postId` | string (UUID) | Yes | Draft post ID |\n\n### Notes\n- `canPublish` is `true` when at least one media is attached and all media have `status: \"READY\"`.\n- `startsAt` and `endsAt` are nullable event timeline fields.\n- `location` is `null` when no location is linked.\n- Returns **403** if not the owner or the post is not a draft."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"DRAFT\",\n  \"caption\": \"Community meetup this Saturday\",\n  \"visibility\": \"PUBLIC\",\n  \"categoryId\": \"f6c5a8ab-6f57-432e-b10b-10ee177aa111\",\n  \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n  \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n  \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n  \"medias\": [\n    {\n      \"id\": \"media-uuid\",\n      \"order\": 0,\n      \"status\": \"READY\"\n    }\n  ],\n  \"location\": {\n    \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n    \"name\": \"India Gate\",\n    \"latitude\": 28.6129,\n    \"longitude\": 77.2295,\n    \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n    \"country\": \"India\",\n    \"state\": \"Delhi\",\n    \"locality\": \"New Delhi\",\n    \"postal_code\": \"110001\"\n  },\n  \"tags\": [\n    \"meetup\",\n    \"community\"\n  ],\n  \"canPublish\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Access Denied",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Access denied\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Post Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Post not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Update Draft Post",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts/{{postId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts",
+                    "{{postId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"caption\": \"Community meetup this Saturday\",\n  \"visibility\": \"PUBLIC\",\n  \"categoryId\": \"f6c5a8ab-6f57-432e-b10b-10ee177aa111\",\n  \"locationId\": \"{{locationId}}\",\n  \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n  \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n  \"tags\": [\n    \"meetup\",\n    \"community\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Update a draft post's metadata. All fields are optional.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `caption` | string | No | Max 5000 characters |\n| `visibility` | string | No | One of: `PUBLIC`, `FRIENDS`, `PRIVATE` |\n| `categoryId` | string (UUID) | No | Must be a valid category |\n| `locationId` | string (UUID) | No | Must be a valid location from `POST /locations` |\n| `startsAt` | string (ISO 8601) | No | Event start timestamp |\n| `endsAt` | string (ISO 8601) | No | Event end timestamp |\n| `tags` | string[] | No | Max 30 tags |\n\n### Notes\n- Sending `tags` replaces the entire tag list (sync operation).\n- `startsAt` and `endsAt` are stored on the post for event-style drafts.\n- Returns **403** if the post is not in DRAFT status."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Post is not in draft\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Category Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Category not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Location Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Location not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Add Media to Draft",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.mediaId) pm.collectionVariables.set('mediaId', json.mediaId);",
+                      "  if (json.uploadUrl) pm.collectionVariables.set('uploadUrl', json.uploadUrl);",
+                      "  console.log('mediaId saved:', json.mediaId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts/{{postId}}/media/upload-url",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts",
+                    "{{postId}}",
+                    "media",
+                    "upload-url"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mediaType\": \"IMAGE\",\n  \"mimeType\": \"image/jpeg\",\n  \"fileName\": \"photo.jpg\",\n  \"size\": 204800,\n  \"order\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Request a pre-signed S3 upload URL for a post media item. Saves `mediaId` and `uploadUrl` to collection variables.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaType` | `\"IMAGE\"` \\| `\"VIDEO\"` | Yes | Enum |\n| `mimeType` | string | Yes | e.g. `image/jpeg`, `video/mp4` |\n| `fileName` | string | Yes | Original file name |\n| `size` | integer | Yes | File size in bytes (≥ 1) |\n| `order` | integer | Yes | Display order within the post (≥ 0) |\n\n### Next Steps\nAfter uploading the file to `uploadUrl`, call `POST /media/complete-upload` to finalize.\n\n### Notes\n- Returns **403** if the post is not a draft or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"mediaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"uploadUrl\": \"https://s3.amazonaws.com/bucket/uploads/tmp/uuid-photo.jpg?X-Amz-Signature=...\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only draft posts can accept media uploads\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Post Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Post not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Remove Media from Draft",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts/{{postId}}/media/{{mediaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts",
+                    "{{postId}}",
+                    "media",
+                    "{{mediaId}}"
+                  ]
+                },
+                "description": "**Protected** — Remove a media item from a draft post and soft-delete it.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `postId` | string (UUID) | Yes | Draft post ID |\n| `mediaId` | string (UUID) | Yes | Media ID to remove |\n\n### Notes\n- Returns **403** if the post is not a draft or the user doesn't own it.\n- Returns **404** if the media is not attached to this post."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Media Not Found in Post",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Media not found in this post\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Publish Draft",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/drafts/{{postId}}/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "drafts",
+                    "{{postId}}",
+                    "publish"
+                  ]
+                },
+                "description": "**Protected** — Publish a draft post. All attached media must have `status: \"READY\"`.\n\n### Notes\n- Returns **400** if the draft has no media or any media is still processing.\n- Returns **403** if the post is not a draft or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"publishedAt\": \"2024-01-15T11:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 Media Not Ready",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"All media must finish processing before publishing\",\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 No Media",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Post must contain at least one media\",\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Published Posts",
+          "description": "Retrieve and manage published posts.",
+          "item": [
+            {
+              "name": "Get Post",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}"
+                  ]
+                },
+                "description": "**Protected** — Retrieve a published post by ID. Returns author data, signed media URLs, tags, linked location, and event timeline.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `postId` | string (UUID) | Yes | Published post ID |\n\n### Notes\n- Returns **403** if the post is not published or the viewer does not have visibility access.\n- Media `url` and `thumbnailUrl` values are signed URLs and expire.\n- `location` is `null` when the post has no linked location."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Community meetup this Saturday\",\n  \"visibility\": \"PUBLIC\",\n  \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n  \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n  \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n  \"likeCount\": 42,\n  \"commentCount\": 7,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"75e4e2ff-f641-40e9-9a47-a2cce4450f50\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"medias\": [\n    {\n      \"id\": \"media-uuid-1\",\n      \"type\": \"IMAGE\",\n      \"mimeType\": \"image/jpeg\",\n      \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n      \"order\": 0,\n      \"image_meta\": {\n        \"width\": 1080,\n        \"height\": 1350\n      },\n      \"video_meta\": null\n    },\n    {\n      \"id\": \"media-uuid-2\",\n      \"type\": \"VIDEO\",\n      \"mimeType\": \"video/mp4\",\n      \"url\": \"https://minio.example.com/private/media-uuid-2.mp4?X-Amz-Signature=...\",\n      \"order\": 1,\n      \"image_meta\": null,\n      \"video_meta\": {\n        \"width\": 1920,\n        \"height\": 1080,\n        \"duration\": 30.5,\n        \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-2-thumb.webp?X-Amz-Signature=...\"\n      }\n    }\n  ],\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    },\n    {\n      \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n      \"name\": \"community\"\n    }\n  ],\n  \"location\": {\n    \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n    \"name\": \"India Gate\",\n    \"latitude\": 28.6129,\n    \"longitude\": 77.2295,\n    \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n    \"country\": \"India\",\n    \"state\": \"Delhi\",\n    \"locality\": \"New Delhi\",\n    \"postal_code\": \"110001\"\n  }\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not Visible",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"You can't view this post\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Post Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Post not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Change Post Visibility",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/visibility",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "visibility"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"visibility\": \"FRIENDS\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Change the visibility of a published post.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `visibility` | `\"PUBLIC\"` \\| `\"FRIENDS\"` \\| `\"PRIVATE\"` | Yes | |\n\n### Notes\n- Only published posts can change visibility.\n- Returns **403** if the post is not published or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"visibility\": \"FRIENDS\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not Published",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only published posts can change visibility\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Delete Post",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}"
+                  ]
+                },
+                "description": "**Protected** — Soft-delete a post (marks it as DELETED and soft-deletes all attached media).\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `postId` | string (UUID) | Yes | Post ID |\n\n### Notes\n- Returns **403** if the post is already deleted or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Already Deleted",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Post has already been deleted\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get My Posts",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/users/me?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "users",
+                    "me"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return the authenticated user's own published posts in reverse-chronological order. Uses cursor-based pagination.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | `nextCursor` value from previous response |\n\n### Media Object\nEach item in `medias` contains:\n| Field | Type | Description |\n|-------|------|-------------|\n| `id` | string | Media UUID |\n| `type` | string | `IMAGE` or `VIDEO` |\n| `mimeType` | string | e.g. `image/jpeg`, `video/mp4` |\n| `url` | string or null | Pre-signed S3 URL — **expires in 1 hour**. `null` if media is still processing. |\n| `order` | integer | Display order within the post |\n| `image_meta` | object or null | `{ width, height }` — only present for IMAGE type |\n| `video_meta` | object or null | `{ width, height, duration, thumbnailUrl }` — only present for VIDEO type |\n\n### Notes\n- Returns all own posts regardless of visibility (PUBLIC, FRIENDS, PRIVATE).\n- Each post now includes `startsAt`, `endsAt`, `tags`, and `location`.\n- `url` is a **signed URL valid for 1 hour** — do not cache beyond that.\n- Pass `nextCursor` as `cursor` to fetch the next page. `null` means no more pages."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Community meetup this Saturday\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 42,\n      \"commentCount\": 7,\n      \"likedByMe\": false,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1080,\n            \"height\": 1350\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        },\n        {\n          \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n          \"name\": \"community\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get User's Posts",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/users/{{targetUserId}}?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "users",
+                    "{{targetUserId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return another user's published posts in reverse-chronological order. Visibility is filtered by the caller's relationship with the target. Uses cursor-based pagination.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `userId` | string (UUID) | Yes | The target user's ID |\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | `nextCursor` value from previous response |\n\n### Visibility Rules\n| Relationship | Posts shown |\n|---|---|\n| Self | PUBLIC + FRIENDS + PRIVATE |\n| Friend | PUBLIC + FRIENDS |\n| Stranger | PUBLIC only |\n| Blocked by target | Empty list (no error) |\n\n### Media Object\nSame shape as **Get My Posts** — see that endpoint for field descriptions.\n\n### Notes\n- Response items include `startsAt`, `endsAt`, `tags`, and `location`.\n- Returns **404** if the target user does not exist.\n- `url` is a **signed URL valid for 1 hour** — do not cache beyond that.\n- Pass `nextCursor` as `cursor` to fetch the next page. `null` means no more pages."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Summer vibes!\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 15,\n      \"commentCount\": 3,\n      \"likedByMe\": true,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1600,\n            \"height\": 1200\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"a2ae267e-542e-4f23-8221-832c791be261\",\n          \"name\": \"summer\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Blocked (empty list)",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"posts\": [],\n  \"nextCursor\": null\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 User Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Likes",
+          "description": "Toggle and list post likes.",
+          "item": [
+            {
+              "name": "Toggle Post Like",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/likes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "likes"
+                  ]
+                },
+                "description": "**Protected** — Toggle a like on a post. If the user already liked the post, it is unliked; otherwise a like is added. Returns the updated `likeCount`.\n\n### Notes\n- Returns **403** if the post is not published or is not visible to the user."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Liked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": true,\n  \"likeCount\": 43\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unliked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": false,\n  \"likeCount\": 42\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Cannot Like",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Cannot like this post\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Post Likes",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/likes?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "likes"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 100, default 20"
+                    },
+                    {
+                      "key": "cursorUserId",
+                      "value": "",
+                      "description": "Cursor from `nextCursor.userId` of previous page",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursorCreatedAt",
+                      "value": "",
+                      "description": "Cursor from `nextCursor.createdAt` of previous page (ISO 8601)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return a paginated list of users who liked the post. Uses cursor-based pagination.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–100, default 20 |\n| `cursorUserId` | string | No | From `nextCursor.userId` of previous response |\n| `cursorCreatedAt` | string (ISO 8601) | No | From `nextCursor.createdAt` of previous response |"
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"users\": [\n    {\n      \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n      \"name\": \"Jane Doe\",\n      \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n      \"likedAt\": \"2024-01-15T12:00:00.000Z\",\n      \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n    }\n  ],\n  \"nextCursor\": {\n    \"userId\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"createdAt\": \"2024-01-15T12:00:00.000Z\"\n  }\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Comments",
+          "description": "Create and retrieve post comments with nested replies, and toggle comment likes.",
+          "item": [
+            {
+              "name": "Create Comment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('commentId', json.id);",
+                      "    console.log('commentId saved:', json.id);",
+                      "  }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/comments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "comments"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Great post!\",\n  \"parentId\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Add a top-level comment or a reply to a post. Automatically saves the returned `id` to `{{commentId}}`.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `content` | string | Yes | 1–5000 characters |\n| `parentId` | string (UUID) | No | Parent comment ID for replies. Only one level of nesting allowed. |\n\n### Notes\n- Returns **400** if `parentId` is itself a reply (nested replies are not allowed).\n- Returns **404** if `parentId` doesn't exist or doesn't belong to this post."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"comment-uuid\",\n  \"parentId\": null,\n  \"createdAt\": \"2024-01-15T11:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 Reply to Reply Not Allowed",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Replies to replies are not allowed\",\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Parent Comment Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Parent comment not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Post Comments",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/comments?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "comments"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return paginated top-level comments for a post. Each comment includes nested `replies`.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | Pagination cursor from `nextCursor` of previous response |\n\n### Notes\n- Only top-level comments are paginated; all replies are nested inside each comment's `replies` array.\n- Sorted newest-first."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"comments\": [\n    {\n      \"id\": \"comment-uuid\",\n      \"content\": \"Great post!\",\n      \"createdAt\": \"2024-01-15T11:00:00.000Z\",\n      \"likeCount\": 3,\n      \"replyCount\": 1,\n      \"likedByMe\": false,\n      \"user\": {\n        \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n        \"name\": \"Jane Doe\",\n        \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n        \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n      },\n      \"replies\": [\n        {\n          \"id\": \"reply-uuid\",\n          \"content\": \"Thanks!\",\n          \"createdAt\": \"2024-01-15T11:05:00.000Z\",\n          \"likeCount\": 0,\n          \"likedByMe\": false,\n          \"user\": {\n            \"id\": \"author-uuid\",\n            \"name\": \"Post Author\",\n            \"profilePicture\": null,\n            \"lastActiveAt\": null\n          }\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"2024-01-15T11:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Toggle Comment Like",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/comments/{{commentId}}/like",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "comments",
+                    "{{commentId}}",
+                    "like"
+                  ]
+                },
+                "description": "**Protected** — Toggle a like on a comment. Already liked → unlike; not liked → like.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `commentId` | string (UUID) | Yes | Comment ID (from `{{commentId}}`) |\n\n### Notes\n- Returns **403** if the parent post is not published or is not visible to the user.\n- Returns **404** if the comment doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Liked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": true,\n  \"likeCount\": 4\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unliked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": false,\n  \"likeCount\": 3\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Comment Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Comment not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
