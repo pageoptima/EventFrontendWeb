@@ -12,6 +12,8 @@ function CreateEventPage() {
     draftState,
     mediaItems,
     form,
+    selectedLocation,
+    isUpsertingLocation,
     publishState,
     publishError,
     canPublish,
@@ -24,6 +26,8 @@ function CreateEventPage() {
     updateForm,
     addTag,
     removeTag,
+    selectLocation,
+    clearLocation,
     publish,
   } = useCreateEvent();
 
@@ -76,6 +80,10 @@ function CreateEventPage() {
           onFormChange={updateForm}
           onAddTag={addTag}
           onRemoveTag={removeTag}
+          selectedLocation={selectedLocation}
+          onSelectLocation={selectLocation}
+          onClearLocation={clearLocation}
+          isUpsertingLocation={isUpsertingLocation}
           canPublish={canPublish}
           isProcessing={isProcessing}
           processingTimedOut={processingTimedOut}

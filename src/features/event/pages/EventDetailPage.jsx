@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Calendar, MapPin, Radio } from "lucide-react";
 import { useEvent, useToggleEventLike } from "@/features/event/hooks/useEvent";
+import { useCountdown } from "@/features/event/hooks/useCountdown";
 import { useEventComments, useCreateComment, useToggleCommentLike } from "@/features/event/hooks/useEventComments";
 import EventMediaCarousel from "@/features/event/components/EventMediaCarousel";
 import CommentItem from "@/features/event/components/CommentItem";
@@ -20,6 +21,123 @@ function getMediaAspectRatio(media) {
 
   return width / height;
 }
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+});
+
+function formatEventDate(dateStr) {
+  return dateFormatter.format(new Date(dateStr));
+}
+
+function EventDateRow({ startsAt, endsAt }) {
+  if (!startsAt) return null;
+  return (
+    <div className="flex items-start gap-1.5 text-xs">
+      <Calendar className="mt-px h-3 w-3 shrink-0 text-muted-foreground" />
+      <span className="text-foreground">
+        {formatEventDate(startsAt)}
+        {endsAt && (
+          <>
+            <span className="mx-1 text-muted-foreground">→</span>
+            {formatEventDate(endsAt)}
+          </>
+        )}
+      </span>
+    </div>
+  );
+}
+
+function EventLocationRow({ location }) {
+  if (!location) return null;
+  const primary = location.name || location.address;
+  const secondary = location.name ? location.address : null;
+  return (
+    <div className="flex items-start gap-1.5 text-xs">
+      <MapPin className="mt-px h-3 w-3 shrink-0 text-muted-foreground" />
+      <span className="min-w-0">
+        <span className="block text-foreground">{primary}</span>
+        {secondary && (
+          <span className="block truncate text-[11px] text-muted-foreground">{secondary}</span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+// ── Countdown overlay ─────────────────────────────────────────────────────────
+
+function CountdownUnit({ value, label, pad = true }) {
+  return (
+    <div className="flex min-w-[1.25rem] flex-col items-center">
+      <span className="text-xs font-bold leading-none tabular-nums text-foreground">
+        {pad ? String(value).padStart(2, "0") : String(value)}
+      </span>
+      <span className="mt-0.5 text-[7px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function CountdownSeparator() {
+  return (
+    <span className="mb-2.5 self-center text-[10px] font-semibold text-foreground/30">
+      :
+    </span>
+  );
+}
+
+function EventCountdownOverlay({ startsAt, endsAt }) {
+  const countdown = useCountdown(startsAt, endsAt);
+
+  if (countdown.state === "none" || countdown.state === "ended") return null;
+
+  if (countdown.state === "live") {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center">
+        <div className="flex items-center gap-1.5 rounded-full bg-red-500 px-2.5 py-1 shadow-md">
+          <Radio className="h-2.5 w-2.5 animate-pulse text-white" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-white">
+            Live
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const { days, hours, minutes, seconds } = countdown;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center">
+      <div className="rounded-lg border border-border/50 bg-background/80 px-2.5 py-1.5 text-center shadow-md backdrop-blur-md">
+        <p className="mb-1 text-[7px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          Starts in
+        </p>
+        <div className="flex items-stretch gap-0.5">
+          {days > 0 && (
+            <>
+              <CountdownUnit value={days} label="d" pad={false} />
+              <CountdownSeparator />
+            </>
+          )}
+          <CountdownUnit value={hours} label="h" />
+          <CountdownSeparator />
+          <CountdownUnit value={minutes} label="m" />
+          <CountdownSeparator />
+          <CountdownUnit value={seconds} label="s" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Author row ────────────────────────────────────────────────────────────────
 
 function AuthorRow({ author, eventId, currentVisibility, isOwn, className = "" }) {
   if (!author) return null;
@@ -221,12 +339,13 @@ function EventDetailPage() {
             isOwn={isOwn}
             className="shrink-0 border-b border-border lg:hidden"
           />
-          <div className="flex-1 lg:min-h-0 lg:overflow-hidden">
+          <div className="relative flex-1 lg:min-h-0 lg:overflow-hidden">
             <EventMediaCarousel
               medias={event.medias ?? []}
               current={currentMediaIndex}
               onChange={setCurrentMediaIndex}
             />
+            <EventCountdownOverlay startsAt={event.startsAt} endsAt={event.endsAt} />
           </div>
           {/* Actions bar — mobile only, sits below the image */}
           <div className="shrink-0 border-t border-border lg:hidden">
@@ -251,10 +370,13 @@ function EventDetailPage() {
           />
 
           {/* Scrollable area: caption + comments (on mobile, page scrolls; on desktop, this div scrolls within h-150) */}
-          <div className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+          <div className="no-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3">
             {event.caption && (
-              <p className="text-sm text-foreground leading-relaxed">{event.caption}</p>
+              <p className="text-sm text-foreground leading-snug">{event.caption}</p>
             )}
+
+            <EventDateRow startsAt={event.startsAt} endsAt={event.endsAt} />
+            <EventLocationRow location={event.location} />
 
             {event.tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5">

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Globe, Users, Lock, X, Loader2, AlertCircle } from "lucide-react";
+import { Globe, Users, Lock, X, Loader2, AlertCircle, MapPin, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LocationSearchInput from "@/features/createEvent/components/LocationSearchInput";
 
 const VISIBILITY_OPTIONS = [
   { value: "PUBLIC", label: "Everyone", Icon: Globe },
@@ -10,6 +11,8 @@ const VISIBILITY_OPTIONS = [
 
 const MAX_CAPTION = 2200;
 const MAX_TAGS = 30;
+
+// ── Tag input ─────────────────────────────────────────────────────────────────
 
 function TagInput({ tags, onAdd, onRemove }) {
   const [input, setInput] = useState("");
@@ -67,11 +70,58 @@ function TagInput({ tags, onAdd, onRemove }) {
   );
 }
 
+// ── Date/time row ─────────────────────────────────────────────────────────────
+
+function DateTimeField({ label, id, value, onChange, min }) {
+  return (
+    <div className="flex-1 space-y-1">
+      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="datetime-local"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        min={min}
+        className={cn(
+          "w-full rounded-lg border border-border bg-transparent px-3 py-2 text-sm text-foreground",
+          "focus:outline-none focus:ring-2 focus:ring-[#B839F1]/40 dark:focus:ring-[#7F5AF0]/40",
+          "[color-scheme:light] dark:[color-scheme:dark]",
+        )}
+      />
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+/**
+ * Props:
+ *   form                — { caption, visibility, tags, startsAt, endsAt }
+ *   onFormChange(patch) — partial update to form
+ *   onAddTag(raw)
+ *   onRemoveTag(tag)
+ *   selectedLocation    — Nominatim result object | null
+ *   onSelectLocation(result)
+ *   onClearLocation()
+ *   isUpsertingLocation — boolean
+ *   canPublish
+ *   isProcessing
+ *   processingTimedOut
+ *   publishState
+ *   publishError
+ *   onPublish
+ */
 function EventDetailsForm({
   form,
   onFormChange,
   onAddTag,
   onRemoveTag,
+  selectedLocation,
+  onSelectLocation,
+  onClearLocation,
+  isUpsertingLocation,
   canPublish,
   isProcessing,
   processingTimedOut,
@@ -81,8 +131,15 @@ function EventDetailsForm({
 }) {
   const isPublishing = publishState === "publishing";
 
+  // Enforce endsAt >= startsAt on the client
+  const dateError =
+    form.startsAt && form.endsAt && form.endsAt < form.startsAt
+      ? "End date must be after start date."
+      : null;
+
   return (
     <div className="flex flex-col gap-5">
+
       {/* Caption */}
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground">Caption</label>
@@ -101,6 +158,50 @@ function EventDetailsForm({
         <p className="text-right text-xs text-muted-foreground">
           {form.caption.length}/{MAX_CAPTION}
         </p>
+      </div>
+
+      {/* Event dates */}
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+          <label className="text-sm font-medium text-foreground">Event Date</label>
+          <span className="text-xs text-muted-foreground">(optional)</span>
+        </div>
+        <div className="flex gap-3">
+          <DateTimeField
+            label="Start"
+            id="event-starts-at"
+            value={form.startsAt}
+            onChange={(v) => onFormChange({ startsAt: v })}
+          />
+          <DateTimeField
+            label="End"
+            id="event-ends-at"
+            value={form.endsAt}
+            onChange={(v) => onFormChange({ endsAt: v })}
+            min={form.startsAt || undefined}
+          />
+        </div>
+        {dateError && (
+          <p className="text-xs text-destructive">{dateError}</p>
+        )}
+      </div>
+
+      {/* Location */}
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+          <label className="text-sm font-medium text-foreground">Location</label>
+          <span className="text-xs text-muted-foreground">(optional)</span>
+          {isUpsertingLocation && (
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        <LocationSearchInput
+          value={selectedLocation}
+          onSelect={onSelectLocation}
+          onClear={onClearLocation}
+        />
       </div>
 
       {/* Visibility */}
@@ -147,7 +248,7 @@ function EventDetailsForm({
         </p>
       )}
 
-      {/* Backend media processing — spinner while waiting, error on timeout */}
+      {/* Backend media processing state */}
       {isProcessing && (
         <div className="flex items-center gap-2 rounded-lg bg-[#7F5AF0]/10 px-3 py-2.5">
           <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#7F5AF0]" />
@@ -169,7 +270,7 @@ function EventDetailsForm({
       <button
         type="button"
         onClick={onPublish}
-        disabled={!canPublish || isPublishing}
+        disabled={!canPublish || isPublishing || !!dateError}
         className={cn(
           "inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-white transition",
           "bg-[linear-gradient(90deg,#7F5AF0_0%,#2CB8E8_100%)] hover:opacity-90 active:opacity-80",

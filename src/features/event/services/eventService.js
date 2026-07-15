@@ -73,3 +73,6 @@ export const deleteEvent = (eventId) =>
 
 export const changeEventVisibility = (eventId, visibility) =>
   api.patch(`/posts/${eventId}/visibility`, { visibility }).then((r) => r.data);
+
+export const upsertLocation = (payload) =>
+  api.post("/locations", payload).then((r) => r.data);

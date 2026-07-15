@@ -9,7 +9,11 @@ import {
   updateDraft,
   publishDraft,
   deleteDraftMedia,
+  upsertLocation,
 } from "@/features/event/services/eventService";
+import {
+  nominatimResultToPayload,
+} from "@/features/location/services/locationService";
 import { eventKeys } from "@/features/event/eventQueryKeys";
 import { getApiErrorMessage } from "@/shared/utils/errors";
 
@@ -43,10 +47,21 @@ export function useCreateEvent() {
 
   const [draftState, setDraftState] = useState("creating");
   const [mediaItems, setMediaItems] = useState([]);
-  const [form, setForm] = useState({ caption: "", visibility: "PUBLIC", tags: [] });
+  const [form, setForm] = useState({
+    caption: "",
+    visibility: "PUBLIC",
+    tags: [],
+    startsAt: "",
+    endsAt: "",
+  });
   const [publishState, setPublishState] = useState("idle");
   const [publishError, setPublishError] = useState(null);
   const [processingTimedOut, setProcessingTimedOut] = useState(false);
+
+  // Location state — stored separately from form because it needs async upsert
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationId, setLocationId] = useState(null);
+  const [isUpsertingLocation, setIsUpsertingLocation] = useState(false);
 
   const abortControllersRef = useRef(new Map());
   const mediaItemsRef = useRef([]);
@@ -60,6 +75,8 @@ export function useCreateEvent() {
       mediaItemsRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
     };
   }, []);
+
+  // ── Draft initialisation ────────────────────────────────────────────────────
 
   const { mutate: initDraft } = useMutation({
     mutationFn: async () => {
@@ -85,6 +102,8 @@ export function useCreateEvent() {
   useEffect(() => {
     initDraft();
   }, [initDraft]);
+
+  // ── Media helpers ───────────────────────────────────────────────────────────
 
   const updateMediaItem = useCallback((localId, patch) => {
     setMediaItems((prev) =>
@@ -187,6 +206,8 @@ export function useCreateEvent() {
     [uploadMediaFile, updateMediaItem],
   );
 
+  // ── Form helpers ────────────────────────────────────────────────────────────
+
   const updateForm = useCallback((patch) => {
     setForm((prev) => ({ ...prev, ...patch }));
   }, []);
@@ -204,6 +225,31 @@ export function useCreateEvent() {
     setForm((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
   }, []);
 
+  // ── Location helpers ────────────────────────────────────────────────────────
+
+  const selectLocation = useCallback(async (nominatimResult) => {
+    setSelectedLocation(nominatimResult);
+    setLocationId(null);
+    setIsUpsertingLocation(true);
+
+    try {
+      const payload = nominatimResultToPayload(nominatimResult);
+      const { locationId: id } = await upsertLocation(payload);
+      setLocationId(id);
+    } catch {
+      // Location is optional — a failed upsert silently falls back to no location
+    } finally {
+      setIsUpsertingLocation(false);
+    }
+  }, []);
+
+  const clearLocation = useCallback(() => {
+    setSelectedLocation(null);
+    setLocationId(null);
+  }, []);
+
+  // ── Publish ─────────────────────────────────────────────────────────────────
+
   const publish = useCallback(async () => {
     const id = draftIdRef.current;
     if (!id) return;
@@ -216,7 +262,11 @@ export function useCreateEvent() {
         caption: form.caption.trim() || undefined,
         visibility: form.visibility,
         tags: form.tags,
+        ...(form.startsAt && { startsAt: new Date(form.startsAt).toISOString() }),
+        ...(form.endsAt && { endsAt: new Date(form.endsAt).toISOString() }),
+        ...(locationId && { locationId }),
       });
+
       await publishDraft(id);
       queryClient.invalidateQueries({ queryKey: eventKeys.userEvents("me") });
       setPublishState("success");
@@ -224,7 +274,9 @@ export function useCreateEvent() {
       setPublishError(getApiErrorMessage(err));
       setPublishState("error");
     }
-  }, [form, queryClient]);
+  }, [form, locationId, queryClient]);
+
+  // ── Processing / canPublish derived state ───────────────────────────────────
 
   const isUploading = mediaItems.some(
     (m) => m.uploadStatus === "uploading" || m.uploadStatus === "pending",
@@ -261,6 +313,8 @@ export function useCreateEvent() {
     draftState,
     mediaItems,
     form,
+    selectedLocation,
+    isUpsertingLocation,
     publishState,
     publishError,
     canPublish,
@@ -274,6 +328,8 @@ export function useCreateEvent() {
     updateForm,
     addTag,
     removeTag,
+    selectLocation,
+    clearLocation,
     publish,
   };
 }
