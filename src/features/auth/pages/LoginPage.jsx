@@ -22,15 +22,15 @@ function LoginPage() {
         <AuthFormError message={apiError} />
 
         <AuthFormField
-          id="email"
-          name="email"
-          label="Email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={fields.email}
+          id="identifier"
+          name="identifier"
+          label="Email or username"
+          type="text"
+          autoComplete="username"
+          placeholder="you@example.com or janedoe"
+          value={fields.identifier}
           onChange={handleChange}
-          error={fieldErrors.email}
+          error={fieldErrors.identifier}
           disabled={isLoading}
         />
 

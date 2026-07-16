@@ -19,3 +19,18 @@ export const updateCoverPicture = (file) => {
   form.append("image", file);
   return api.patch("/profile/cover-picture", form, multipart).then((r) => r.data);
 };
+
+export const updateProfile = (data) =>
+  api.patch("/profile", data).then((r) => r.data);
+
+export const updateAddress = (data) =>
+  api.patch("/profile/address", data).then((r) => r.data);
+
+export const updateSettings = (data) =>
+  api.patch("/profile/settings", data).then((r) => r.data);
+
+export const updateEmail = (data) =>
+  api.patch("/profile/email", data).then((r) => r.data);
+
+export const updatePhone = (data) =>
+  api.patch("/profile/phone", data).then((r) => r.data);

@@ -1,97 +1,39 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Loader2, Moon, Sun } from "lucide-react";
-import { clearCredentials } from "@/stores/slices/authSlice";
-import { toggleTheme, selectThemeMode } from "@/stores/slices/themeSlice";
-import { useBlockedUsers, useOutgoingRequests } from "@/features/friend/hooks/useFriendQueries";
-import { friendKeys } from "@/features/friend/queryKeys";
-import { unblockUser, deleteFriendRequest } from "@/features/friend/services/friendService";
+import { useQueryClient } from "@tanstack/react-query";
+import { User, Bookmark, Moon, BarChart2, Shield, LogOut } from "lucide-react";
+import { clearCredentials, selectCurrentUser } from "@/stores/slices/authSlice";
+import { useMyProfile } from "@/features/profile/hooks/useProfile";
+import EditProfilePanel from "@/features/settings/components/EditProfilePanel";
+import SavedEventsPanel from "@/features/settings/components/SavedEventsPanel";
+import ThemePanel from "@/features/settings/components/ThemePanel";
+import AnalyticsPanel from "@/features/settings/components/AnalyticsPanel";
+import PrivacyPanel from "@/features/settings/components/PrivacyPanel";
 
-function BlockedUserItem({ user }) {
-  const queryClient = useQueryClient();
+const NAV_ITEMS = [
+  { key: "profile",   label: "Edit Profile",  icon: User      },
+  { key: "saved",     label: "Saved Events",   icon: Bookmark  },
+  { key: "theme",     label: "Theme",          icon: Moon      },
+  { key: "analytics", label: "Analytics",      icon: BarChart2 },
+  { key: "privacy",   label: "Privacy",        icon: Shield    },
+];
 
-  const unblock = useMutation({
-    mutationFn: () => unblockUser(user.id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: friendKeys.blocklist() }),
-  });
-
-  return (
-    <div className="flex items-center gap-3 py-2.5">
-      {user.profilePicture ? (
-        <img
-          src={user.profilePicture}
-          alt={user.name}
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
-          {user.name?.[0]?.toUpperCase() ?? "?"}
-        </div>
-      )}
-      <span className="flex-1 text-sm font-medium text-foreground">{user.name}</span>
-      <button
-        type="button"
-        onClick={() => unblock.mutate()}
-        disabled={unblock.isPending}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
-      >
-        {unblock.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Unblock"}
-      </button>
-    </div>
-  );
-}
-
-function SentRequestItem({ request }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const cancel = useMutation({
-    mutationFn: () => deleteFriendRequest(request.id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: friendKeys.outgoingRequests() }),
-  });
-
-  return (
-    <div className="flex items-center gap-3 py-2.5">
-      {request.receiver.profilePicture ? (
-        <img
-          src={request.receiver.profilePicture}
-          alt={request.receiver.name}
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
-          {request.receiver.name?.[0]?.toUpperCase() ?? "?"}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={() => navigate(`/profile/${request.receiver.id}`)}
-        className="flex-1 text-left text-sm font-medium text-foreground hover:underline"
-      >
-        {request.receiver.name}
-      </button>
-      <button
-        type="button"
-        onClick={() => cancel.mutate()}
-        disabled={cancel.isPending}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:bg-muted disabled:opacity-60"
-      >
-        {cancel.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Cancel"}
-      </button>
-    </div>
-  );
-}
+const PANELS = {
+  profile:   EditProfilePanel,
+  saved:     SavedEventsPanel,
+  theme:     ThemePanel,
+  analytics: AnalyticsPanel,
+  privacy:   PrivacyPanel,
+};
 
 function SettingsPage() {
-  const dispatch = useDispatch();
+  const dispatch    = useDispatch();
   const queryClient = useQueryClient();
-  const themeMode = useSelector(selectThemeMode);
-  const isDark = themeMode === "dark";
-  const { data: blockedUsers = [], isLoading: blocklistLoading } = useBlockedUsers();
-  const { data: outgoingRequests = [], isLoading: outgoingLoading } = useOutgoingRequests();
+  const user        = useSelector(selectCurrentUser);
+  const { data: profile } = useMyProfile();
+  const [activeTab, setActiveTab] = useState("profile");
+
+  const ActivePanel = PANELS[activeTab];
 
   const handleLogout = () => {
     dispatch(clearCredentials());
@@ -99,104 +41,72 @@ function SettingsPage() {
   };
 
   return (
-    <section className="max-w-lg space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your account preferences
-        </p>
-      </div>
+    <div className="flex flex-col gap-6 md:grid md:grid-cols-[224px_1fr]">
 
-      {/* Appearance */}
-      <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Appearance
-        </p>
-        <div className="flex items-center justify-between rounded-lg px-3 py-2.5">
-          <div className="flex items-center gap-3">
-            {isDark ? (
-              <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      {/* ── Sidebar ──────────────────────────────────────────────────── */}
+      <aside className="w-full md:sticky md:top-6 md:self-start">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card md:h-[calc(100vh-3rem)]">
+
+          {/* User identity */}
+          <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-4">
+            {profile?.profilePicture ? (
+              <img
+                src={profile.profilePicture}
+                alt={user?.name}
+                className="h-10 w-10 shrink-0 rounded-full object-cover"
+              />
             ) : (
-              <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-white">
+                {user?.name?.[0]?.toUpperCase() ?? "?"}
+              </div>
             )}
-            <span className="text-sm font-medium text-foreground">Dark mode</span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-foreground">{user?.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+            </div>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isDark}
-            onClick={() => dispatch(toggleTheme())}
-            className={[
-              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isDark ? "bg-[#7F5AF0]" : "bg-border",
-            ].join(" ")}
-          >
-            <span
-              className={[
-                "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out",
-                isDark ? "translate-x-5" : "translate-x-0.5",
-              ].join(" ")}
-            />
-          </button>
+
+          {/* Navigation — grows to fill remaining space */}
+          <nav className="flex-1 overflow-y-auto p-2 space-y-0.5" aria-label="Settings navigation">
+            {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                className={[
+                  "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+                  activeTab === key
+                    ? "bg-[#7F5AF0] font-semibold text-white"
+                    : "font-medium text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Log out — always at the bottom */}
+          <div className="shrink-0 border-t border-border p-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive transition hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+              Log out
+            </button>
+          </div>
+
         </div>
+      </aside>
+
+      {/* ── Content panel ────────────────────────────────────────────── */}
+      <div className="min-w-0">
+        <ActivePanel />
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Account
-        </p>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive transition hover:bg-destructive/10"
-        >
-          <LogOut className="h-4 w-4" aria-hidden="true" />
-          Log out
-        </button>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-4">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Friend Requests
-        </p>
-        <p className="mt-2 px-1 text-sm font-medium text-foreground">Sent Requests</p>
-
-        {outgoingLoading ? (
-          <div className="flex justify-center py-6">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : outgoingRequests.length === 0 ? (
-          <p className="mt-2 px-1 text-sm text-muted-foreground">No pending sent requests.</p>
-        ) : (
-          <div className="mt-2 divide-y divide-border">
-            {outgoingRequests.map((req) => (
-              <SentRequestItem key={req.id} request={req} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-4">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Privacy
-        </p>
-        <p className="mt-2 px-1 text-sm font-medium text-foreground">Blocked Users</p>
-
-        {blocklistLoading ? (
-          <div className="flex justify-center py-6">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : blockedUsers.length === 0 ? (
-          <p className="mt-2 px-1 text-sm text-muted-foreground">No blocked users.</p>
-        ) : (
-          <div className="mt-2 divide-y divide-border">
-            {blockedUsers.map((user) => (
-              <BlockedUserItem key={user.id} user={user} />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+    </div>
   );
 }
 

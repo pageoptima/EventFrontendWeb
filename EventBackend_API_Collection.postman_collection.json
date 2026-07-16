@@ -59,6 +59,12 @@
       "value": "",
       "type": "string",
       "description": "Comment ID — auto-populated after Create Comment"
+    },
+    {
+      "key": "teaserId",
+      "value": "",
+      "type": "string",
+      "description": "Teaser ID — auto-populated after Create Draft Teaser"
     }
   ],
   "auth": {
@@ -212,14 +218,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"StrongPass123\"\n}",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"username\": \"jane_doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"StrongPass123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "**Public** — Create a new user account.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `name` | string | Yes | 2–50 characters |\n| `email` | string | Yes | Valid email format |\n| `password` | string | Yes | 3–100 characters |\n\n### Notes\n- On success, the `accessToken` is automatically saved to `{{accessToken}}`.\n- Returns **409** if the email is already registered."
+            "description": "**Public** — Create a new user account.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `name` | string | Yes | 2–50 characters |\n| `username` | string | Yes | 2–50 characters; lowercase letters, numbers, dots and underscores only |\n| `email` | string | Yes | Valid email format |\n| `password` | string | Yes | 3–100 characters |\n\n### Notes\n- On success, the `accessToken` is automatically saved to `{{accessToken}}`.\n- Returns **409** if the email is already registered."
           },
           "response": [
             {
@@ -749,7 +755,7 @@
                 "me"
               ]
             },
-            "description": "**Protected** — Returns the authenticated user's own full profile including email, bio, picture URLs, post count, and friend count."
+            "description": "**Protected** — Returns the authenticated user's own full profile including email, phone, bio, picture URLs, gender, dateOfBirth, emailVerified, phoneVerified, address, settings, post count, and friend count."
           },
           "response": [
             {
@@ -762,7 +768,306 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"bio\": \"Hello world!\",\n  \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n  \"coverPicture\": \"https://cdn.example.com/profiles/jane-cover.webp\",\n  \"joinedAt\": \"2024-01-01T00:00:00.000Z\",\n  \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\",\n  \"postCount\": 12,\n  \"friendCount\": 34\n}",
+              "body": "{\n  \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"username\": \"jane_doe\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"phone\": \"+911234567890\",\n  \"dateOfBirth\": \"1995-06-15T00:00:00.000Z\",\n  \"gender\": \"FEMALE\",\n  \"bio\": \"Hello world!\",\n  \"emailVerified\": false,\n  \"phoneVerified\": false,\n  \"address\": {\n    \"id\": \"addr-uuid\",\n    \"addressLine\": \"12 Main Street\",\n    \"city\": \"New Delhi\",\n    \"state\": \"Delhi\",\n    \"country\": \"India\",\n    \"postalCode\": \"110001\",\n    \"latitude\": 28.6129,\n    \"longitude\": 77.2295\n  },\n  \"settings\": {\n    \"id\": \"setting-uuid\",\n    \"desktopNotification\": \"ALLOW\"\n  },\n  \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n  \"coverPicture\": \"https://cdn.example.com/profiles/jane-cover.webp\",\n  \"joinedAt\": \"2024-01-01T00:00:00.000Z\",\n  \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\",\n  \"postCount\": 12,\n  \"friendCount\": 34\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"username\": \"jane_doe\",\n  \"bio\": \"Hello world!\",\n  \"gender\": \"FEMALE\",\n  \"dateOfBirth\": \"1995-06-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Update the authenticated user's profile fields. All fields are optional — only provided fields are updated.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `name` | string | No | 2–100 characters |\n| `username` | string | No | 3–30 chars; lowercase letters, numbers, dots (.) and underscores (_) only; cannot start/end with `.` or `_`; no consecutive `..` or `__` |\n| `bio` | string | No | Max 500 characters |\n| `gender` | string | No | `MALE`, `FEMALE`, `NON_BINARY`, or `PREFER_NOT_TO_SAY` |\n| `dateOfBirth` | string (ISO 8601 date) | No | e.g. `\"1995-06-15\"` |\n\n### Notes\n- Returns **409** if the chosen `username` is already taken.\n- Returns **400** if `username` is reserved or has invalid characters."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"username\": \"jane_doe\",\n  \"name\": \"Jane Doe\",\n  \"bio\": \"Hello world!\",\n  \"gender\": \"FEMALE\",\n  \"dateOfBirth\": \"1995-06-15T00:00:00.000Z\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 Username Taken",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Username is already taken.\",\n  \"error\": \"Conflict\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "400 Invalid Username",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Username may contain only lowercase letters, numbers, dots and underscores.\",\n  \"error\": \"Bad Request\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/address",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "address"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressLine\": \"12 Main Street\",\n  \"city\": \"New Delhi\",\n  \"state\": \"Delhi\",\n  \"country\": \"India\",\n  \"postalCode\": \"110001\",\n  \"latitude\": 28.6129,\n  \"longitude\": 77.2295\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Create or update the authenticated user's address (upsert).\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `addressLine` | string | Yes | Max 255 characters |\n| `city` | string | No | Max 100 characters |\n| `state` | string | No | Max 100 characters |\n| `country` | string | No | Max 100 characters |\n| `postalCode` | string | No | Valid postal code |\n| `latitude` | number | No | Decimal latitude |\n| `longitude` | number | No | Decimal longitude |"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"addr-uuid\",\n  \"userId\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"addressLine\": \"12 Main Street\",\n  \"city\": \"New Delhi\",\n  \"state\": \"Delhi\",\n  \"country\": \"India\",\n  \"postalCode\": \"110001\",\n  \"latitude\": 28.6129,\n  \"longitude\": 77.2295\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "404 User Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "settings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"desktopNotification\": \"ALLOW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Create or update the authenticated user's settings (upsert).\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `desktopNotification` | string | Yes | `ALLOW`, `MUTE_2_HOURS`, `MUTE_8_HOURS`, or `MUTE_FOREVER` |"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"setting-uuid\",\n  \"userId\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n  \"desktopNotification\": \"ALLOW\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Email",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "email"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.email@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Change the authenticated user's email address.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `email` | string | Yes | Valid email format |\n\n### Notes\n- Returns **409** if the email is already registered to another account.\n- Setting a new email resets `emailVerified` to `false`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 Email Already Registered",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Email already registered\",\n  \"error\": \"Conflict\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Update Phone",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/profile/phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "profile",
+                "phone"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+911234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Protected** — Change the authenticated user's phone number.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `phone` | string | Yes | Valid international phone number (E.164, e.g. `+911234567890`) |\n\n### Notes\n- Returns **409** if the phone number is already registered to another account.\n- Setting a new phone number resets `phoneVerified` to `false`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "409 Phone Already Registered",
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"Phone number is already registered.\",\n  \"error\": \"Conflict\"\n}",
               "_postman_previewlanguage": "json"
             }
           ]
@@ -794,7 +1099,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n  \"name\": \"Alice Wonder\",\n  \"bio\": \"Explorer\",\n  \"profilePicture\": \"https://cdn.example.com/profiles/alice.webp\",\n  \"coverPicture\": null,\n  \"lastActiveAt\": \"2024-01-15T10:00:00.000Z\",\n  \"postCount\": 5,\n  \"friendCount\": 20,\n  \"isMe\": false,\n  \"relationship\": {\n    \"isFriend\": true,\n    \"isBlocked\": false,\n    \"requestSent\": false,\n    \"requestReceived\": false,\n    \"canMessage\": true,\n    \"requestId\": null\n  }\n}",
+              "body": "{\n  \"id\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n  \"name\": \"Alice Wonder\",\n  \"username\": \"alice_wonder\",\n  \"bio\": \"Explorer\",\n  \"profilePicture\": \"https://cdn.example.com/profiles/alice.webp\",\n  \"coverPicture\": null,\n  \"lastActiveAt\": \"2024-01-15T10:00:00.000Z\",\n  \"postCount\": 5,\n  \"friendCount\": 20,\n  \"isMe\": false,\n  \"relationship\": {\n    \"isFriend\": true,\n    \"isBlocked\": false,\n    \"requestSent\": false,\n    \"requestReceived\": false,\n    \"canMessage\": true,\n    \"requestId\": null\n  }\n}",
               "_postman_previewlanguage": "json"
             },
             {
@@ -2631,6 +2936,7 @@
             },
             {
               "name": "Toggle Comment Like",
+
               "request": {
                 "method": "POST",
                 "url": {
@@ -2685,6 +2991,595 @@
                     }
                   ],
                   "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Comment not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🎬 Teasers",
+      "description": "Teaser lifecycle — short video/image previews attached to events.\n\n## Draft Workflow\n1. **Create Draft** → get `teaserId`.\n2. **Add Media** → get signed upload URL, PUT binary to S3, then call `POST /media/complete-upload`.\n3. **Update Draft** → set caption, visibility, category, tags.\n4. **Publish Draft** → media must be `READY`.\n\n## Notes\n- One teaser has exactly **one** media. Requesting a new upload URL automatically removes any previously attached media.\n- Visibility options: `PUBLIC`, `FRIENDS`, `PRIVATE`.",
+      "item": [
+        {
+          "name": "Drafts",
+          "description": "Create and manage draft teasers before publishing.",
+          "item": [
+            {
+              "name": "Create Draft Teaser",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('teaserId', json.id);",
+                      "    console.log('teaserId saved:', json.id);",
+                      "  }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts"
+                  ]
+                },
+                "description": "**Protected** — Create a new draft teaser. If the user already has an active draft, the existing draft is returned instead. Automatically saves the returned `id` to `{{teaserId}}`.\n\n### Notes\n- One active draft per user at a time.\n- The draft must have media in `READY` status before it can be published."
+              },
+              "response": [
+                {
+                  "name": "201 Created",
+                  "status": "Created",
+                  "code": 201,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"DRAFT\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Add Media to Draft Teaser",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.mediaId) pm.collectionVariables.set('mediaId', json.mediaId);",
+                      "  if (json.uploadUrl) pm.collectionVariables.set('uploadUrl', json.uploadUrl);",
+                      "  console.log('mediaId saved:', json.mediaId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts/{{teaserId}}/media/upload-url",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts",
+                    "{{teaserId}}",
+                    "media",
+                    "upload-url"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mediaType\": \"VIDEO\",\n  \"mimeType\": \"video/mp4\",\n  \"fileName\": \"teaser.mp4\",\n  \"size\": 10485760\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Request a pre-signed S3 upload URL for the teaser's media. Saves `mediaId` and `uploadUrl` to collection variables.\n\n**Important:** A teaser has only one media slot. Calling this endpoint again automatically removes any previously attached media before creating a new upload.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaType` | `\"IMAGE\"` \\| `\"VIDEO\"` | Yes | Enum |\n| `mimeType` | string | Yes | e.g. `video/mp4`, `image/jpeg` |\n| `fileName` | string | Yes | Original file name |\n| `size` | integer | Yes | File size in bytes (≥ 1) |\n\n### Next Steps\nAfter uploading the file to `uploadUrl`, call `POST /media/complete-upload` to finalize.\n\n### Notes\n- Returns **403** if the teaser is not a draft or the user doesn't own it.\n- Returns **404** if the teaser doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"mediaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"uploadUrl\": \"https://s3.amazonaws.com/bucket/uploads/tmp/uuid-teaser.mp4?X-Amz-Signature=...\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only draft teasers can accept media uploads\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Remove Media from Draft Teaser",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts/{{teaserId}}/media",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts",
+                    "{{teaserId}}",
+                    "media"
+                  ]
+                },
+                "description": "**Protected** — Remove the media attached to a draft teaser and soft-delete it. This operation is idempotent — if no media is attached, it still returns success.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Draft teaser ID |\n\n### Notes\n- Returns **403** if the teaser is not a draft or the user doesn't own it.\n- Returns **404** if the teaser doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only draft teasers can be edited\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Draft Teaser",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts/{{teaserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts",
+                    "{{teaserId}}"
+                  ]
+                },
+                "description": "**Protected** — Retrieve the full state of a draft teaser, including attached media and `canPublish` flag.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Draft teaser ID |\n\n### Notes\n- `canPublish` is `true` when media is attached and has `status: \"READY\"`.\n- `media` is `null` when no media is attached.\n- `tags` is an array of tag name strings.\n- Returns **403** if not the owner or the teaser is not a draft."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"DRAFT\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"categoryId\": \"f6c5a8ab-6f57-432e-b10b-10ee177aa111\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"tags\": [\"meetup\", \"community\"],\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"status\": \"READY\"\n  },\n  \"canPublish\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Access Denied",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Access denied\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Update Draft Teaser",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts/{{teaserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts",
+                    "{{teaserId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"categoryId\": \"f6c5a8ab-6f57-432e-b10b-10ee177aa111\",\n  \"tags\": [\"meetup\", \"community\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Update a draft teaser's metadata. All fields are optional.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `caption` | string | No | Max 5000 characters |\n| `visibility` | string | No | `PUBLIC`, `FRIENDS`, or `PRIVATE` |\n| `categoryId` | string (UUID) | No | Must be a valid category |\n| `tags` | string[] | No | Max 30 tags; replaces the entire tag list |\n\n### Notes\n- Sending `tags` replaces the entire tag list (sync operation).\n- Returns **403** if the teaser is not a draft or the user doesn't own it.\n- Returns **404** if `categoryId` does not exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only draft teasers can be edited\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Category Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Category not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Publish Draft Teaser",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/drafts/{{teaserId}}/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "drafts",
+                    "{{teaserId}}",
+                    "publish"
+                  ]
+                },
+                "description": "**Protected** — Publish a draft teaser. The media must have `status: \"READY\"`.\n\n### Notes\n- Returns **400** if the draft has no media or if media is still processing.\n- Returns **403** if the teaser is not a draft or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"publishedAt\": \"2024-01-15T11:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 No Media",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Teaser must contain one media\",\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 Media Not Ready",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Media must finish processing before publishing\",\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not a Draft",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only draft teasers can be published\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Published Teasers",
+          "description": "Retrieve, manage visibility of, and delete published teasers.",
+          "item": [
+            {
+              "name": "Get Teaser",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}"
+                  ]
+                },
+                "description": "**Protected** — Retrieve a published teaser by ID. Returns author info, signed media URL, tags, and engagement counts.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Notes\n- Returns **403** if the teaser is not published or the viewer doesn't have visibility access.\n- `media.url` is a signed URL that expires in 1 hour.\n- `tags` is an array of `{ id, name }` objects."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"likeCount\": 10,\n  \"commentCount\": 3,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"username\": \"jane_doe\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"type\": \"VIDEO\",\n    \"mimeType\": \"video/mp4\",\n    \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n    \"image_meta\": null,\n    \"video_meta\": {\n      \"width\": 1920,\n      \"height\": 1080,\n      \"duration\": 15.0,\n      \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n    }\n  },\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    }\n  ]\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not Published / Not Visible",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Teaser is not published\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Change Teaser Visibility",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/visibility",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "visibility"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"visibility\": \"FRIENDS\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Change the visibility of a published teaser.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `visibility` | `\"PUBLIC\"` \\| `\"FRIENDS\"` \\| `\"PRIVATE\"` | Yes | |\n\n### Notes\n- Only published teasers can change visibility.\n- Returns **403** if the teaser is not published or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"visibility\": \"FRIENDS\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Not Published",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Only published teasers can change visibility\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Delete Teaser",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}"
+                  ]
+                },
+                "description": "**Protected** — Soft-delete a teaser (marks it as DELETED and soft-deletes the attached media).\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Teaser ID |\n\n### Notes\n- Returns **403** if the teaser is already deleted or the user doesn't own it."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Already Deleted",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Teaser has already been deleted\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]

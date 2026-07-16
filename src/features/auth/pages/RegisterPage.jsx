@@ -35,6 +35,19 @@ function RegisterPage() {
         />
 
         <AuthFormField
+          id="username"
+          name="username"
+          label="Username"
+          type="text"
+          autoComplete="username"
+          placeholder="janedoe"
+          value={fields.username}
+          onChange={handleChange}
+          error={fieldErrors.username}
+          disabled={isLoading}
+        />
+
+        <AuthFormField
           id="email"
           name="email"
           label="Email"

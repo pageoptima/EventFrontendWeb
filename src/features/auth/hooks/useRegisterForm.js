@@ -8,10 +8,10 @@ import { getApiErrorMessage } from "@/shared/utils/errors";
 import { EMAIL_REGEX } from "@/shared/utils/regex";
 import { decodeJwt } from "@/shared/utils/jwt";
 
-const INITIAL_FIELDS = { name: "", email: "", password: "" };
-const INITIAL_ERRORS = { name: "", email: "", password: "" };
+const INITIAL_FIELDS = { name: "", username: "", email: "", password: "" };
+const INITIAL_ERRORS = { name: "", username: "", email: "", password: "" };
 
-function validate({ name, email, password }) {
+function validate({ name, username, email, password }) {
   const errors = {};
   const trimmedName = name.trim();
   if (
@@ -19,6 +19,13 @@ function validate({ name, email, password }) {
     trimmedName.length > VALIDATION.NAME_MAX
   ) {
     errors.name = `Name must be ${VALIDATION.NAME_MIN}–${VALIDATION.NAME_MAX} characters.`;
+  }
+  const trimmedUsername = username.trim();
+  if (
+    trimmedUsername.length < VALIDATION.USERNAME_MIN ||
+    trimmedUsername.length > VALIDATION.USERNAME_MAX
+  ) {
+    errors.username = `Username must be ${VALIDATION.USERNAME_MIN}–${VALIDATION.USERNAME_MAX} characters.`;
   }
   if (!EMAIL_REGEX.test(email.trim())) {
     errors.email = "Enter a valid email address.";
@@ -56,6 +63,7 @@ export function useRegisterForm() {
     }
     mutation.mutate({
       name: fields.name.trim(),
+      username: fields.username.trim(),
       email: fields.email.trim(),
       password: fields.password,
     });

@@ -239,7 +239,7 @@ function ProfileDetailsSection({
 
   if (!profile) return null;
 
-  const { name, bio, profilePicture, coverPicture, postCount, friendCount, relationship } = profile;
+  const { name, username, bio, profilePicture, coverPicture, postCount, friendCount, relationship } = profile;
   const isBlockedByThem = !isOwn && Boolean(relationship?.isBlockedByThem);
 
   const handlePictureFile = (e) => {
@@ -321,9 +321,14 @@ function ProfileDetailsSection({
         )}
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <h1 className="text-3xl font-semibold leading-none text-foreground">
-            {name}
-          </h1>
+          <div>
+            <h1 className="text-3xl font-semibold leading-none text-foreground">
+              {name}
+            </h1>
+            {username && (
+              <p className="mt-1 text-sm text-muted-foreground">@{username}</p>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             {isOwn ? (

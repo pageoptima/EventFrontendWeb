@@ -5,16 +5,15 @@ import { setCredentials } from "@/stores/slices/authSlice";
 import { login } from "@/features/auth/services/authService";
 import { VALIDATION } from "@/shared/utils/constants";
 import { getApiErrorMessage } from "@/shared/utils/errors";
-import { EMAIL_REGEX } from "@/shared/utils/regex";
 import { decodeJwt } from "@/shared/utils/jwt";
 
-const INITIAL_FIELDS = { email: "", password: "" };
-const INITIAL_ERRORS = { email: "", password: "" };
+const INITIAL_FIELDS = { identifier: "", password: "" };
+const INITIAL_ERRORS = { identifier: "", password: "" };
 
-function validate({ email, password }) {
+function validate({ identifier, password }) {
   const errors = {};
-  if (!EMAIL_REGEX.test(email.trim())) {
-    errors.email = "Enter a valid email address.";
+  if (!identifier.trim()) {
+    errors.identifier = "Email or username is required.";
   }
   if (password.length < VALIDATION.PASSWORD_MIN) {
     errors.password = `Password must be at least ${VALIDATION.PASSWORD_MIN} characters.`;
@@ -47,7 +46,7 @@ export function useLoginForm() {
       setFieldErrors((prev) => ({ ...prev, ...errors }));
       return;
     }
-    mutation.mutate({ email: fields.email.trim(), password: fields.password });
+    mutation.mutate({ identifier: fields.identifier.trim(), password: fields.password });
   };
 
   return {
