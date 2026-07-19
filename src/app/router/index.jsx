@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   Teaser,
+  TeaserDetail,
 } from "@/features";
 
 const router = createBrowserRouter([
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
           { path: "create-event", element: <CreateEvent /> },
           { path: "create-teaser", element: <CreateTeaser /> },
           { path: "events/:eventId", element: <EventDetail /> },
+          { path: "teasers/:teaserId", element: <TeaserDetail /> },
           { path: "settings", element: <Settings /> },
           { path: "*", element: <NotFound /> },
         ],

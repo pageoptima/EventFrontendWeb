@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "event-backend-api-collection",
     "name": "EventBackend API",
-    "description": "Complete API collection for the EventBackend — an Instagram-like event social platform.\n\n## Setup\n1. Import this collection and the accompanying **EventBackend Environment**.\n2. Set `baseUrl` to your running server (e.g. `http://localhost:3000`).\n3. After calling **Register** or **Login**, the `accessToken` variable is automatically saved and used by all protected routes.\n\n## Auth\nAll endpoints except **Health** and **Auth** require a valid JWT Bearer token unless marked *Public*.\n\n## Folder Structure\n- 🏥 Health\n- 🔐 Auth\n- 🖼️ Media\n- 👤 Profile\n- 🤝 Friends / Friend Requests\n- 🚫 Block\n- 👤 Users\n- 📍 Locations\n- 📝 Posts",
+    "description": "Complete API collection for the EventBackend — an Instagram-like event social platform.\n\n## Setup\n1. Import this collection and the accompanying **EventBackend Environment**.\n2. Set `baseUrl` to your running server (e.g. `http://localhost:3000`).\n3. After calling **Register** or **Login**, the `accessToken` variable is automatically saved and used by all protected routes.\n\n## Auth\nAll endpoints except **Health** and **Auth** require a valid JWT Bearer token unless marked *Public*.\n\n## Folder Structure\n- 🏥 Health\n- 🔐 Auth\n- 🖼️ Media\n- 👤 Profile\n- 🤝 Friends / Friend Requests\n- 🚫 Block\n- 👤 Users\n- 📍 Locations\n- 📝 Posts\n- 🎬 Teasers",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -65,6 +65,12 @@
       "value": "",
       "type": "string",
       "description": "Teaser ID — auto-populated after Create Draft Teaser"
+    },
+    {
+      "key": "teaserCommentId",
+      "value": "",
+      "type": "string",
+      "description": "Teaser Comment ID — auto-populated after Create Teaser Comment"
     }
   ],
   "auth": {
@@ -3001,7 +3007,7 @@
     },
     {
       "name": "🎬 Teasers",
-      "description": "Teaser lifecycle — short video/image previews attached to events.\n\n## Draft Workflow\n1. **Create Draft** → get `teaserId`.\n2. **Add Media** → get signed upload URL, PUT binary to S3, then call `POST /media/complete-upload`.\n3. **Update Draft** → set caption, visibility, category, tags.\n4. **Publish Draft** → media must be `READY`.\n\n## Notes\n- One teaser has exactly **one** media. Requesting a new upload URL automatically removes any previously attached media.\n- Visibility options: `PUBLIC`, `FRIENDS`, `PRIVATE`.",
+      "description": "Teaser lifecycle — short video previews attached to events.\n\n## Draft Workflow\n1. **Create Draft** → get `teaserId`.\n2. **Add Media** → get signed upload URL, PUT binary to S3, then call `POST /media/complete-upload`.\n3. **Update Draft** → set caption, visibility, category, tags.\n4. **Publish Draft** → media must be `READY`.\n\n## Engagement\n- **Toggle Like** a teaser or a teaser comment.\n- **Get Likes** — paginated list of users who liked a teaser (composite cursor).\n- **Create / Get Comments** — top-level comments with nested replies.\n\n## User Teasers\n- **Get My Teasers** / **Get User Teasers** — cursor-paginated teaser feed for any user.\n\n## Notes\n- One teaser has exactly **one** media. Requesting a new upload URL automatically removes any previously attached media.\n- **Video only** — `createMediaUploadUrl` rejects any `mediaType` other than `VIDEO` with a 400, even though the DTO field is typed against the shared `IMAGE | VIDEO` enum.\n- Visibility options: `PUBLIC`, `FRIENDS`, `PRIVATE`.",
       "item": [
         {
           "name": "Drafts",
@@ -3104,7 +3110,7 @@
                     }
                   }
                 },
-                "description": "**Protected** — Request a pre-signed S3 upload URL for the teaser's media. Saves `mediaId` and `uploadUrl` to collection variables.\n\n**Important:** A teaser has only one media slot. Calling this endpoint again automatically removes any previously attached media before creating a new upload.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaType` | `\"IMAGE\"` \\| `\"VIDEO\"` | Yes | Enum |\n| `mimeType` | string | Yes | e.g. `video/mp4`, `image/jpeg` |\n| `fileName` | string | Yes | Original file name |\n| `size` | integer | Yes | File size in bytes (≥ 1) |\n\n### Next Steps\nAfter uploading the file to `uploadUrl`, call `POST /media/complete-upload` to finalize.\n\n### Notes\n- Returns **403** if the teaser is not a draft or the user doesn't own it.\n- Returns **404** if the teaser doesn't exist."
+                "description": "**Protected** — Request a pre-signed S3 upload URL for the teaser's media. Saves `mediaId` and `uploadUrl` to collection variables.\n\n**Important:** A teaser has only one media slot. Calling this endpoint again automatically removes any previously attached media before creating a new upload.\n\n**Video only:** although `mediaType` is typed against the shared `IMAGE | VIDEO` enum, the service layer rejects anything other than `VIDEO` with a 400 (`teaser.service.ts` — `createMediaUploadUrl`). Teasers cannot be images.\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `mediaType` | `\"VIDEO\"` | Yes | Must be `VIDEO` — `IMAGE` is rejected with 400 |\n| `mimeType` | string | Yes | e.g. `video/mp4` |\n| `fileName` | string | Yes | Original file name |\n| `size` | integer | Yes | File size in bytes (≥ 1) |\n\n### Next Steps\nAfter uploading the file to `uploadUrl`, call `POST /media/complete-upload` to finalize.\n\n### Notes\n- Returns **400** (`\"Only Video is allowed.\"`) if `mediaType` is not `VIDEO`.\n- Returns **403** if the teaser is not a draft or the user doesn't own it.\n- Returns **404** if the teaser doesn't exist."
               },
               "response": [
                 {
@@ -3118,6 +3124,19 @@
                     }
                   ],
                   "body": "{\n  \"mediaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"uploadUrl\": \"https://s3.amazonaws.com/bucket/uploads/tmp/uuid-teaser.mp4?X-Amz-Signature=...\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 Only Video Allowed",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Only Video is allowed.\",\n  \"error\": \"Bad Request\"\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {
@@ -3434,7 +3453,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"likeCount\": 10,\n  \"commentCount\": 3,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"username\": \"jane_doe\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"type\": \"VIDEO\",\n    \"mimeType\": \"video/mp4\",\n    \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n    \"image_meta\": null,\n    \"video_meta\": {\n      \"width\": 1920,\n      \"height\": 1080,\n      \"duration\": 15.0,\n      \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n    }\n  },\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    }\n  ]\n}",
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"likeCount\": 10,\n  \"commentCount\": 3,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"username\": \"jane_doe\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"type\": \"VIDEO\",\n    \"mimeType\": \"video/mp4\",\n    \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n    \"video_meta\": {\n      \"width\": 1920,\n      \"height\": 1080,\n      \"duration\": 15.0,\n      \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n    }\n  },\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    }\n  ]\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {
@@ -3580,6 +3599,418 @@
                     }
                   ],
                   "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Engagement",
+          "description": "Like and comment on published teasers.",
+          "item": [
+            {
+              "name": "Toggle Teaser Like",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/likes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "likes"
+                  ]
+                },
+                "description": "**Protected** — Toggle a like on a published teaser. Already liked → unlike; not liked → like.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Notes\n- Returns **404** if the teaser doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Liked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": true,\n  \"likeCount\": 11\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unliked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": false,\n  \"likeCount\": 10\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Teaser Likes",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/likes?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "likes"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 100, default 20"
+                    },
+                    {
+                      "key": "cursorUserId",
+                      "value": "",
+                      "description": "Cursor: userId from previous response's nextCursor",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursorCreatedAt",
+                      "value": "",
+                      "description": "Cursor: ISO 8601 createdAt from previous response's nextCursor",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Get a paginated list of users who liked a teaser.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–100, default 20 |\n| `cursorUserId` | string | No | Cursor from `nextCursor.userId` of previous response |\n| `cursorCreatedAt` | string (ISO 8601) | No | Cursor from `nextCursor.createdAt` of previous response |\n\n### Notes\n- Uses a composite cursor (`userId` + `createdAt`) for stable pagination. Pass both cursor fields or neither."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"users\": [\n    {\n      \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n      \"name\": \"Jane Doe\",\n      \"username\": \"jane_doe\",\n      \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n      \"likedAt\": \"2024-01-15T11:00:00.000Z\",\n      \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n    }\n  ],\n  \"nextCursor\": {\n    \"userId\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"createdAt\": \"2024-01-15T11:00:00.000Z\"\n  }\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Create Teaser Comment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "  const json = pm.response.json();",
+                      "  if (json.id) {",
+                      "    pm.collectionVariables.set('teaserCommentId', json.id);",
+                      "    console.log('teaserCommentId saved:', json.id);",
+                      "  }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/comments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "comments"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Great teaser!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "**Protected** — Post a comment on a published teaser. Optionally reply to another comment.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Request Body\n| Field | Type | Required | Constraints |\n|-------|------|----------|-------------|\n| `content` | string | Yes | 1–5000 characters |\n| `parentId` | string (UUID) | No | ID of the parent comment to reply to |\n\n### Notes\n- On success, the returned `id` is automatically saved to `{{teaserCommentId}}`."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"id\": \"comment-uuid\",\n  \"parentId\": null,\n  \"createdAt\": \"2024-01-15T11:30:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "400 Validation Error",
+                  "status": "Bad Request",
+                  "code": 400,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 400,\n  \"message\": [\"content must be longer than or equal to 1 characters\"],\n  \"error\": \"Bad Request\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Teaser Comments",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/comments?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "comments"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return paginated top-level comments for a teaser. Each comment includes nested `replies`.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | Pagination cursor from `nextCursor` of previous response |\n\n### Notes\n- Only top-level comments are paginated; all replies are nested inside each comment's `replies` array.\n- Sorted newest-first."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"comments\": [\n    {\n      \"id\": \"comment-uuid\",\n      \"content\": \"Great teaser!\",\n      \"createdAt\": \"2024-01-15T11:30:00.000Z\",\n      \"likeCount\": 2,\n      \"replyCount\": 1,\n      \"likedByMe\": false,\n      \"user\": {\n        \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n        \"name\": \"Jane Doe\",\n        \"username\": \"jane_doe\",\n        \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\",\n        \"lastActiveAt\": \"2024-01-15T14:20:00.000Z\"\n      },\n      \"replies\": [\n        {\n          \"id\": \"reply-uuid\",\n          \"content\": \"Thanks!\",\n          \"createdAt\": \"2024-01-15T11:35:00.000Z\",\n          \"likeCount\": 0,\n          \"likedByMe\": false,\n          \"user\": {\n            \"id\": \"author-uuid\",\n            \"name\": \"Teaser Author\",\n            \"username\": \"teaser_author\",\n            \"profilePicture\": null,\n            \"lastActiveAt\": null\n          }\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"2024-01-15T11:30:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Toggle Teaser Comment Like",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/comments/{{teaserCommentId}}/like",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "comments",
+                    "{{teaserCommentId}}",
+                    "like"
+                  ]
+                },
+                "description": "**Protected** — Toggle a like on a teaser comment. Already liked → unlike; not liked → like.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `commentId` | string (UUID) | Yes | Teaser comment ID (from `{{teaserCommentId}}`) |\n\n### Notes\n- Returns **404** if the comment doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Liked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": true,\n  \"likeCount\": 3\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unliked",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"liked\": false,\n  \"likeCount\": 2\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Comment Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Comment not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "User Teasers",
+          "description": "Retrieve all teasers belonging to a specific user, paginated by cursor.",
+          "item": [
+            {
+              "name": "Get My Teasers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/users/me?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "users",
+                    "me"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return the authenticated user's own teasers, paginated newest-first.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | Pagination cursor from `nextCursor` of previous response |\n\n### Notes\n- Returns all statuses (DRAFT, PUBLISHED, DELETED) for the owner's own teasers.\n- Each teaser includes media (with signed URL), tags, and engagement counts."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"2024-01-15T10:00:00.000Z\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get User Teasers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/users/{{targetUserId}}?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "users",
+                    "{{targetUserId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 50, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return published teasers for any user by their ID, paginated newest-first.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `userId` | string (UUID) | Yes | Target user's ID |\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–50, default 20 |\n| `cursor` | string (ISO 8601) | No | Pagination cursor from `nextCursor` of previous response |\n\n### Notes\n- Only `PUBLISHED` teasers visible to the current user are returned (respects `FRIENDS` and `PRIVATE` visibility).\n- Returns **404** if the target user doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": null\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 User Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]

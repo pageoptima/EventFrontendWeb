@@ -1,7 +1,9 @@
 import { useRef, useEffect } from "react";
 import { Grid3X3, PlaySquare } from "lucide-react";
 import GalleryCard from "@/features/profile/components/GalleryCard";
+import TeaserGalleryCard from "@/features/profile/components/TeaserGalleryCard";
 import { useUserEvents } from "@/features/event/hooks/useUserEvents";
+import { useUserTeasers } from "@/features/teaser/hooks/useUserTeasers";
 
 const tabs = [
   { key: "events", label: "Event", Icon: Grid3X3 },
@@ -66,6 +68,64 @@ function EventsGrid({ userId }) {
   );
 }
 
+function TeasersGrid({ userId }) {
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useUserTeasers(userId);
+  const loaderRef = useRef(null);
+
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  if (isLoading) {
+    return (
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />
+        ))}
+      </div>
+    );
+  }
+
+  const teasers = data?.pages.flatMap((page) => page.teasers) ?? [];
+
+  if (teasers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-14 text-center">
+        <p className="text-sm text-muted-foreground">No teasers yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {teasers.map((teaser) => (
+          <TeaserGalleryCard key={teaser.id} teaser={teaser} />
+        ))}
+      </div>
+      <div ref={loaderRef} className="py-2">
+        {isFetchingNextPage && (
+          <div className="flex justify-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-foreground" />
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 function ProfileEventsSection({ activeTab, onTabChange, userId }) {
   return (
     <div className="border-t border-border px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
@@ -90,9 +150,7 @@ function ProfileEventsSection({ activeTab, onTabChange, userId }) {
       {activeTab === "events" ? (
         <EventsGrid userId={userId} />
       ) : (
-        <div className="flex flex-col items-center justify-center py-14 text-center">
-          <p className="text-sm text-muted-foreground">No {activeTab} yet.</p>
-        </div>
+        <TeasersGrid userId={userId} />
       )}
     </div>
   );

@@ -2,6 +2,7 @@ export { default as EventDetail } from "@/features/event";
 export { default as Home } from "@/features/home";
 export { default as Search } from "@/features/search";
 export { default as Teaser } from "@/features/teaser";
+export { TeaserDetailPage as TeaserDetail } from "@/features/teaser";
 export { default as Chats } from "@/features/chats";
 export { default as Profile } from "@/features/profile";
 export { UserProfilePage as UserProfile } from "@/features/profile";
