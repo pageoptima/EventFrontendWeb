@@ -1,18 +1,18 @@
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 import { User, Bookmark, Moon, BarChart2, Shield, LogOut } from "lucide-react";
 import { clearCredentials, selectCurrentUser } from "@/stores/slices/authSlice";
 import { useMyProfile } from "@/features/profile/hooks/useProfile";
+import { useTabSearchParam } from "@/shared/hooks/useTabSearchParam";
 import EditProfilePanel from "@/features/settings/components/EditProfilePanel";
-import SavedEventsPanel from "@/features/settings/components/SavedEventsPanel";
+import SavedPanel from "@/features/settings/components/SavedPanel";
 import ThemePanel from "@/features/settings/components/ThemePanel";
 import AnalyticsPanel from "@/features/settings/components/AnalyticsPanel";
 import PrivacyPanel from "@/features/settings/components/PrivacyPanel";
 
 const NAV_ITEMS = [
   { key: "profile",   label: "Edit Profile",  icon: User      },
-  { key: "saved",     label: "Saved Events",   icon: Bookmark  },
+  { key: "saved",     label: "Saved",          icon: Bookmark  },
   { key: "theme",     label: "Theme",          icon: Moon      },
   { key: "analytics", label: "Analytics",      icon: BarChart2 },
   { key: "privacy",   label: "Privacy",        icon: Shield    },
@@ -20,18 +20,21 @@ const NAV_ITEMS = [
 
 const PANELS = {
   profile:   EditProfilePanel,
-  saved:     SavedEventsPanel,
+  saved:     SavedPanel,
   theme:     ThemePanel,
   analytics: AnalyticsPanel,
   privacy:   PrivacyPanel,
 };
+
+const DEFAULT_TAB = NAV_ITEMS[0].key;
+const VALID_TABS = NAV_ITEMS.map((item) => item.key);
 
 function SettingsPage() {
   const dispatch    = useDispatch();
   const queryClient = useQueryClient();
   const user        = useSelector(selectCurrentUser);
   const { data: profile } = useMyProfile();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useTabSearchParam(DEFAULT_TAB, VALID_TABS);
 
   const ActivePanel = PANELS[activeTab];
 

@@ -76,3 +76,11 @@ export const changeEventVisibility = (eventId, visibility) =>
 
 export const upsertLocation = (payload) =>
   api.post("/locations", payload).then((r) => r.data);
+
+export const toggleEventSave = (eventId) =>
+  api.post(`/posts/${eventId}/saves`).then((r) => r.data);
+
+export const getSavedEvents = ({ cursor, limit = 20 } = {}) =>
+  api
+    .get("/posts/users/saves", { params: { limit, ...(cursor && { cursor }) } })
+    .then((r) => r.data);

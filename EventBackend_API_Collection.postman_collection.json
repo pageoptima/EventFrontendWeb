@@ -1991,7 +1991,7 @@
     },
     {
       "name": "📝 Posts",
-      "description": "Post lifecycle: draft creation, media attachment, publishing, and engagement (likes & comments).\n\n## Draft Workflow\n1. **Create Draft** → get `postId`.\n2. **Add Media** → upload file to signed URL, then call `POST /media/complete-upload`.\n3. **Optionally Upsert Location** → get `locationId` from `POST /locations`.\n4. **Update Draft** → set caption, visibility, tags, location, and event timeline.\n5. **Publish Draft** → all media must be `READY`.",
+      "description": "Post lifecycle: draft creation, media attachment, publishing, and engagement (likes, comments & saves).\n\n## Draft Workflow\n1. **Create Draft** → get `postId`.\n2. **Add Media** → upload file to signed URL, then call `POST /media/complete-upload`.\n3. **Optionally Upsert Location** → get `locationId` from `POST /locations`.\n4. **Update Draft** → set caption, visibility, tags, location, and event timeline.\n5. **Publish Draft** → all media must be `READY`.\n\n## Saves\n- **Toggle Save** — bookmark/unbookmark a post.\n- **Get Saved Posts** — cursor-paginated list of the current user's saved posts.\n\n## Notes\n- `GET /posts/:postId`, `GET /posts/users/me`, and `GET /posts/users/:userId` all now include a `savedByMe` boolean alongside `likedByMe`.",
       "item": [
         {
           "name": "Drafts",
@@ -2425,7 +2425,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Community meetup this Saturday\",\n  \"visibility\": \"PUBLIC\",\n  \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n  \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n  \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n  \"likeCount\": 42,\n  \"commentCount\": 7,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"75e4e2ff-f641-40e9-9a47-a2cce4450f50\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"medias\": [\n    {\n      \"id\": \"media-uuid-1\",\n      \"type\": \"IMAGE\",\n      \"mimeType\": \"image/jpeg\",\n      \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n      \"order\": 0,\n      \"image_meta\": {\n        \"width\": 1080,\n        \"height\": 1350\n      },\n      \"video_meta\": null\n    },\n    {\n      \"id\": \"media-uuid-2\",\n      \"type\": \"VIDEO\",\n      \"mimeType\": \"video/mp4\",\n      \"url\": \"https://minio.example.com/private/media-uuid-2.mp4?X-Amz-Signature=...\",\n      \"order\": 1,\n      \"image_meta\": null,\n      \"video_meta\": {\n        \"width\": 1920,\n        \"height\": 1080,\n        \"duration\": 30.5,\n        \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-2-thumb.webp?X-Amz-Signature=...\"\n      }\n    }\n  ],\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    },\n    {\n      \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n      \"name\": \"community\"\n    }\n  ],\n  \"location\": {\n    \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n    \"name\": \"India Gate\",\n    \"latitude\": 28.6129,\n    \"longitude\": 77.2295,\n    \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n    \"country\": \"India\",\n    \"state\": \"Delhi\",\n    \"locality\": \"New Delhi\",\n    \"postal_code\": \"110001\"\n  }\n}",
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Community meetup this Saturday\",\n  \"visibility\": \"PUBLIC\",\n  \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n  \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n  \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n  \"likeCount\": 42,\n  \"commentCount\": 7,\n  \"likedByMe\": false,\n  \"savedByMe\": false,\n  \"author\": {\n    \"id\": \"75e4e2ff-f641-40e9-9a47-a2cce4450f50\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"medias\": [\n    {\n      \"id\": \"media-uuid-1\",\n      \"type\": \"IMAGE\",\n      \"mimeType\": \"image/jpeg\",\n      \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n      \"order\": 0,\n      \"image_meta\": {\n        \"width\": 1080,\n        \"height\": 1350\n      },\n      \"video_meta\": null\n    },\n    {\n      \"id\": \"media-uuid-2\",\n      \"type\": \"VIDEO\",\n      \"mimeType\": \"video/mp4\",\n      \"url\": \"https://minio.example.com/private/media-uuid-2.mp4?X-Amz-Signature=...\",\n      \"order\": 1,\n      \"image_meta\": null,\n      \"video_meta\": {\n        \"width\": 1920,\n        \"height\": 1080,\n        \"duration\": 30.5,\n        \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-2-thumb.webp?X-Amz-Signature=...\"\n      }\n    }\n  ],\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    },\n    {\n      \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n      \"name\": \"community\"\n    }\n  ],\n  \"location\": {\n    \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n    \"name\": \"India Gate\",\n    \"latitude\": 28.6129,\n    \"longitude\": 77.2295,\n    \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n    \"country\": \"India\",\n    \"state\": \"Delhi\",\n    \"locality\": \"New Delhi\",\n    \"postal_code\": \"110001\"\n  }\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {
@@ -2603,7 +2603,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Community meetup this Saturday\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 42,\n      \"commentCount\": 7,\n      \"likedByMe\": false,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1080,\n            \"height\": 1350\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        },\n        {\n          \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n          \"name\": \"community\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
+                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Community meetup this Saturday\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 42,\n      \"commentCount\": 7,\n      \"likedByMe\": false,\n      \"savedByMe\": false,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1080,\n            \"height\": 1350\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        },\n        {\n          \"id\": \"e74cbff0-a2ca-4e54-9512-bbd99c44af38\",\n          \"name\": \"community\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]
@@ -2649,7 +2649,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Summer vibes!\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 15,\n      \"commentCount\": 3,\n      \"likedByMe\": true,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1600,\n            \"height\": 1200\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"a2ae267e-542e-4f23-8221-832c791be261\",\n          \"name\": \"summer\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
+                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Summer vibes!\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 15,\n      \"commentCount\": 3,\n      \"likedByMe\": true,\n      \"savedByMe\": true,\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"order\": 0,\n          \"image_meta\": {\n            \"width\": 1600,\n            \"height\": 1200\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"a2ae267e-542e-4f23-8221-832c791be261\",\n          \"name\": \"summer\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": \"2026-07-13T08:00:00.000Z\"\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {
@@ -2676,6 +2676,130 @@
                     }
                   ],
                   "body": "{\n  \"statusCode\": 404,\n  \"message\": \"User not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Saves",
+          "description": "Toggle and list saved (bookmarked) posts.",
+          "item": [
+            {
+              "name": "Toggle Save Post",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/{{postId}}/saves",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{postId}}",
+                    "saves"
+                  ]
+                },
+                "description": "**Protected** — Toggle saving (bookmarking) a post for the authenticated user. Already saved → unsaved; not saved → saved.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `postId` | string (UUID) | Yes | Published post ID |\n\n### Notes\n- Returns **403** if the post is not published or is not visible to the user.\n- Returns **404** if the post doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Saved",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"saved\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unsaved",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"saved\": false\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Cannot Save",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Cannot save this post\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Post Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Post not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Saved Posts",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/posts/users/saves?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "users",
+                    "saves"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 100, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return the authenticated user's saved (bookmarked) posts, newest-saved first. Uses cursor-based pagination.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–100, default 20 |\n| `cursor` | string (ISO 8601) | No | `nextCursor` value from previous response |\n\n### Notes\n- Only posts still visible to the current user are included (a post saved earlier is silently excluded if it was later made private or the author blocked you).\n- Each item includes full post data — author, medias, tags, location — since a saved post may belong to any user, not just the caller."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"posts\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Community meetup this Saturday\",\n      \"startsAt\": \"2026-07-20T11:00:00.000Z\",\n      \"endsAt\": \"2026-07-20T14:00:00.000Z\",\n      \"createdAt\": \"2026-07-14T10:00:00.000Z\",\n      \"likeCount\": 42,\n      \"commentCount\": 7,\n      \"likedByMe\": false,\n      \"savedByMe\": true,\n      \"author\": {\n        \"id\": \"75e4e2ff-f641-40e9-9a47-a2cce4450f50\",\n        \"username\": \"jane_doe\",\n        \"name\": \"Jane Doe\",\n        \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n      },\n      \"medias\": [\n        {\n          \"id\": \"media-uuid-1\",\n          \"order\": 0,\n          \"type\": \"IMAGE\",\n          \"mimeType\": \"image/jpeg\",\n          \"url\": \"https://minio.example.com/private/media-uuid-1.webp?X-Amz-Signature=...\",\n          \"image_meta\": {\n            \"width\": 1080,\n            \"height\": 1350\n          },\n          \"video_meta\": null\n        }\n      ],\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ],\n      \"location\": {\n        \"id\": \"8ea1d51c-4eb5-4cac-b61c-c7e4f4b2f88d\",\n        \"latitude\": 28.6129,\n        \"longitude\": 77.2295,\n        \"name\": \"India Gate\",\n        \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001, India\",\n        \"country\": \"India\",\n        \"state\": \"Delhi\",\n        \"locality\": \"New Delhi\",\n        \"postal_code\": \"110001\"\n      }\n    }\n  ],\n  \"nextCursor\": null\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]
@@ -3007,7 +3131,7 @@
     },
     {
       "name": "🎬 Teasers",
-      "description": "Teaser lifecycle — short video previews attached to events.\n\n## Draft Workflow\n1. **Create Draft** → get `teaserId`.\n2. **Add Media** → get signed upload URL, PUT binary to S3, then call `POST /media/complete-upload`.\n3. **Update Draft** → set caption, visibility, category, tags.\n4. **Publish Draft** → media must be `READY`.\n\n## Engagement\n- **Toggle Like** a teaser or a teaser comment.\n- **Get Likes** — paginated list of users who liked a teaser (composite cursor).\n- **Create / Get Comments** — top-level comments with nested replies.\n\n## User Teasers\n- **Get My Teasers** / **Get User Teasers** — cursor-paginated teaser feed for any user.\n\n## Notes\n- One teaser has exactly **one** media. Requesting a new upload URL automatically removes any previously attached media.\n- **Video only** — `createMediaUploadUrl` rejects any `mediaType` other than `VIDEO` with a 400, even though the DTO field is typed against the shared `IMAGE | VIDEO` enum.\n- Visibility options: `PUBLIC`, `FRIENDS`, `PRIVATE`.",
+      "description": "Teaser lifecycle — short video previews attached to events.\n\n## Draft Workflow\n1. **Create Draft** → get `teaserId`.\n2. **Add Media** → get signed upload URL, PUT binary to S3, then call `POST /media/complete-upload`.\n3. **Update Draft** → set caption, visibility, category, tags.\n4. **Publish Draft** → media must be `READY`.\n\n## Saves\n- **Toggle Save** — bookmark/unbookmark a teaser.\n- **Get Saved Teasers** — cursor-paginated list of the current user's saved teasers.\n\n## Engagement\n- **Toggle Like** a teaser or a teaser comment.\n- **Get Likes** — paginated list of users who liked a teaser (composite cursor).\n- **Create / Get Comments** — top-level comments with nested replies.\n\n## User Teasers\n- **Get My Teasers** / **Get User Teasers** — cursor-paginated teaser feed for any user.\n\n## Notes\n- One teaser has exactly **one** media. Requesting a new upload URL automatically removes any previously attached media.\n- **Video only** — `createMediaUploadUrl` rejects any `mediaType` other than `VIDEO` with a 400, even though the DTO field is typed against the shared `IMAGE | VIDEO` enum.\n- Visibility options: `PUBLIC`, `FRIENDS`, `PRIVATE`.\n- `GET /teasers/:teaserId`, `GET /teasers/users/me`, and `GET /teasers/users/:userId` all now include a `savedByMe` boolean alongside `likedByMe`.",
       "item": [
         {
           "name": "Drafts",
@@ -3453,7 +3577,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"likeCount\": 10,\n  \"commentCount\": 3,\n  \"likedByMe\": false,\n  \"author\": {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"username\": \"jane_doe\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"type\": \"VIDEO\",\n    \"mimeType\": \"video/mp4\",\n    \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n    \"video_meta\": {\n      \"width\": 1920,\n      \"height\": 1080,\n      \"duration\": 15.0,\n      \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n    }\n  },\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    }\n  ]\n}",
+                  "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"status\": \"PUBLISHED\",\n  \"caption\": \"Preview of our upcoming event!\",\n  \"visibility\": \"PUBLIC\",\n  \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n  \"likeCount\": 10,\n  \"commentCount\": 3,\n  \"likedByMe\": false,\n  \"savedByMe\": false,\n  \"author\": {\n    \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"username\": \"jane_doe\",\n    \"name\": \"Jane Doe\",\n    \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n  },\n  \"media\": {\n    \"id\": \"media-uuid\",\n    \"type\": \"VIDEO\",\n    \"mimeType\": \"video/mp4\",\n    \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n    \"video_meta\": {\n      \"width\": 1920,\n      \"height\": 1080,\n      \"duration\": 15.0,\n      \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n    }\n  },\n  \"tags\": [\n    {\n      \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n      \"name\": \"meetup\"\n    }\n  ]\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {
@@ -3599,6 +3723,130 @@
                     }
                   ],
                   "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Saves",
+          "description": "Toggle and list saved (bookmarked) teasers.",
+          "item": [
+            {
+              "name": "Toggle Save Teaser",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/{{teaserId}}/saves",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "{{teaserId}}",
+                    "saves"
+                  ]
+                },
+                "description": "**Protected** — Toggle saving (bookmarking) a teaser for the authenticated user. Already saved → unsaved; not saved → saved.\n\n### Path Parameters\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| `teaserId` | string (UUID) | Yes | Published teaser ID |\n\n### Notes\n- Returns **403** if the teaser is not published or is not visible to the user.\n- Returns **404** if the teaser doesn't exist."
+              },
+              "response": [
+                {
+                  "name": "200 OK — Saved",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"saved\": true\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "200 OK — Unsaved",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"saved\": false\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "403 Cannot Save",
+                  "status": "Forbidden",
+                  "code": 403,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 403,\n  \"message\": \"Cannot save this teaser\",\n  \"error\": \"Forbidden\"\n}",
+                  "_postman_previewlanguage": "json"
+                },
+                {
+                  "name": "404 Teaser Not Found",
+                  "status": "Not Found",
+                  "code": 404,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Teaser not found\",\n  \"error\": \"Not Found\"\n}",
+                  "_postman_previewlanguage": "json"
+                }
+              ]
+            },
+            {
+              "name": "Get Saved Teasers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/teasers/users/saves?limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "teasers",
+                    "users",
+                    "saves"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Page size — 1 to 100, default 20"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "",
+                      "description": "ISO 8601 date from `nextCursor` of previous response",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "**Protected** — Return the authenticated user's saved (bookmarked) teasers, newest-saved first. Uses cursor-based pagination.\n\n### Query Parameters\n| Parameter | Type | Required | Constraints |\n|-----------|------|----------|-------------|\n| `limit` | integer | No | 1–100, default 20 |\n| `cursor` | string (ISO 8601) | No | `nextCursor` value from previous response |\n\n### Notes\n- Only teasers still visible to the current user are included (a teaser saved earlier is silently excluded if it was later made private or the author blocked you).\n- Each item includes full teaser data — author, media, tags — since a saved teaser may belong to any user, not just the caller."
+              },
+              "response": [
+                {
+                  "name": "200 OK",
+                  "status": "OK",
+                  "code": 200,
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"savedByMe\": true,\n      \"author\": {\n        \"id\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n        \"username\": \"jane_doe\",\n        \"name\": \"Jane Doe\",\n        \"profilePicture\": \"https://cdn.example.com/profiles/jane.webp\"\n      },\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": null\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]
@@ -3951,7 +4199,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"2024-01-15T10:00:00.000Z\"\n}",
+                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"savedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": \"2024-01-15T10:00:00.000Z\"\n}",
                   "_postman_previewlanguage": "json"
                 }
               ]
@@ -3997,7 +4245,7 @@
                       "value": "application/json"
                     }
                   ],
-                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": null\n}",
+                  "body": "{\n  \"teasers\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"caption\": \"Preview of our upcoming event!\",\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\",\n      \"likeCount\": 10,\n      \"commentCount\": 3,\n      \"likedByMe\": false,\n      \"savedByMe\": false,\n      \"media\": {\n        \"id\": \"media-uuid\",\n        \"type\": \"VIDEO\",\n        \"mimeType\": \"video/mp4\",\n        \"url\": \"https://minio.example.com/private/media-uuid.mp4?X-Amz-Signature=...\",\n        \"video_meta\": {\n          \"width\": 1920,\n          \"height\": 1080,\n          \"duration\": 15.0,\n          \"thumbnailUrl\": \"https://minio.example.com/private/media-uuid-thumb.webp?X-Amz-Signature=...\"\n        }\n      },\n      \"tags\": [\n        {\n          \"id\": \"33a7a242-69dc-4267-bbb4-933583f66f95\",\n          \"name\": \"meetup\"\n        }\n      ]\n    }\n  ],\n  \"nextCursor\": null\n}",
                   "_postman_previewlanguage": "json"
                 },
                 {

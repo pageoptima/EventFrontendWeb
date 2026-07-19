@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import RightSidebar from "@/shared/components/RightSidebar";
@@ -12,12 +11,16 @@ import {
   updateCoverPicture,
 } from "@/features/profile/services/profileService";
 import { patchUser } from "@/stores/slices/authSlice";
+import { useTabSearchParam } from "@/shared/hooks/useTabSearchParam";
+
+const DEFAULT_TAB = "events";
+const VALID_TABS = [DEFAULT_TAB, "teaser"];
 
 function ProfilePage() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { data: profile, isLoading, error, refetch } = useMyProfile();
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useTabSearchParam(DEFAULT_TAB, VALID_TABS);
 
   const pictureMutation = useMutation({
     mutationFn: updateProfilePicture,

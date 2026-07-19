@@ -74,3 +74,11 @@ export const deleteTeaser = (teaserId) =>
 
 export const changeTeaserVisibility = (teaserId, visibility) =>
   api.patch(`/teasers/${teaserId}/visibility`, { visibility }).then((r) => r.data);
+
+export const toggleTeaserSave = (teaserId) =>
+  api.post(`/teasers/${teaserId}/saves`).then((r) => r.data);
+
+export const getSavedTeasers = ({ cursor, limit = 20 } = {}) =>
+  api
+    .get("/teasers/users/saves", { params: { limit, ...(cursor && { cursor }) } })
+    .then((r) => r.data);

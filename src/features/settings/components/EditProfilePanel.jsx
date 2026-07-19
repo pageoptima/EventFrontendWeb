@@ -189,7 +189,7 @@ function EditProfileForm({ profile }) {
         </p>
       </Field>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Gender" id="pf-gender" error={errors.gender}>
           <select
             id="pf-gender"
@@ -286,7 +286,7 @@ function EditAddressForm({ profile }) {
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="City" id="addr-city" error={errors.city}>
           <input
             id="addr-city"
@@ -311,7 +311,7 @@ function EditAddressForm({ profile }) {
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Country" id="addr-country" error={errors.country}>
           <input
             id="addr-country"

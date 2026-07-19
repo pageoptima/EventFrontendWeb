@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import RightSidebar from "@/shared/components/RightSidebar";
 import ProfileDetailsSection from "@/features/profile/components/ProfileDetailsSection";
@@ -6,12 +5,16 @@ import ProfileEventsSection from "@/features/profile/components/ProfileEventsSec
 import ProfileSkeleton from "@/features/profile/components/ProfileSkeleton";
 import { useUserProfile } from "@/features/profile/hooks/useProfile";
 import { useFriendActions } from "@/features/friend/hooks/useFriendActions";
+import { useTabSearchParam } from "@/shared/hooks/useTabSearchParam";
+
+const DEFAULT_TAB = "events";
+const VALID_TABS = [DEFAULT_TAB, "teaser"];
 
 function UserProfilePage() {
   const { id } = useParams();
   const { data: profile, isLoading, error } = useUserProfile(id);
   const actions = useFriendActions(id);
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useTabSearchParam(DEFAULT_TAB, VALID_TABS);
 
   if (isLoading) return <ProfileSkeleton />;
 

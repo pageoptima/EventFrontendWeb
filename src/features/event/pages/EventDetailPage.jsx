@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Calendar, MapPin, Radio } from "lucide-react";
-import { useEvent, useToggleEventLike } from "@/features/event/hooks/useEvent";
+import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Calendar, MapPin, Radio, Bookmark } from "lucide-react";
+import { useEvent, useToggleEventLike, useToggleEventSave } from "@/features/event/hooks/useEvent";
 import { useCountdown } from "@/features/event/hooks/useCountdown";
 import { useEventComments, useCreateComment, useToggleCommentLike } from "@/features/event/hooks/useEventComments";
 import EventMediaCarousel from "@/features/event/components/EventMediaCarousel";
@@ -156,7 +156,7 @@ function AuthorRow({ author, eventId, currentVisibility, isOwn, className = "" }
   );
 }
 
-function ActionsBar({ event, onToggleLike, isPending, onShowLikes }) {
+function ActionsBar({ event, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -181,6 +181,17 @@ function ActionsBar({ event, onToggleLike, isPending, onShowLikes }) {
         <MessageCircle className="h-5 w-5" />
         {event.commentCount ?? 0}
       </span>
+      <button
+        type="button"
+        onClick={onToggleSave}
+        disabled={isSavePending}
+        aria-label={event.savedByMe ? "Unsave event" : "Save event"}
+        className="ml-auto flex items-center gap-1.5 text-sm font-medium text-foreground"
+      >
+        <Bookmark
+          className={`h-5 w-5 transition ${event.savedByMe ? "fill-foreground" : ""}`}
+        />
+      </button>
     </div>
   );
 }
@@ -198,6 +209,7 @@ function EventDetailPage() {
 
   const { data: event, isLoading, error } = useEvent(eventId);
   const toggleLike = useToggleEventLike(eventId);
+  const toggleSave = useToggleEventSave(eventId);
 
   const {
     data: commentsData,
@@ -354,6 +366,8 @@ function EventDetailPage() {
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
+              onToggleSave={() => toggleSave.mutate()}
+              isSavePending={toggleSave.isPending}
             />
           </div>
         </div>
@@ -434,6 +448,8 @@ function EventDetailPage() {
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
+              onToggleSave={() => toggleSave.mutate()}
+              isSavePending={toggleSave.isPending}
             />
           </div>
 

@@ -5,4 +5,5 @@ export const teaserKeys = {
   userTeasers: (userId) => [...teaserKeys.all, "userTeasers", userId],
   comments: (teaserId) => [...teaserKeys.all, "comments", teaserId],
   likes: (teaserId) => [...teaserKeys.all, "likes", teaserId],
+  saved: () => [...teaserKeys.all, "saved"],
 };

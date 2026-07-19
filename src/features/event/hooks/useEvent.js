@@ -6,8 +6,10 @@ import {
   getEventLikes,
   deleteEvent,
   changeEventVisibility,
+  toggleEventSave,
 } from "@/features/event/services/eventService";
 import { eventKeys } from "@/features/event/eventQueryKeys";
+import { useOptimisticToggleMutation } from "@/shared/hooks/useOptimisticToggleMutation";
 
 export function useEvent(eventId) {
   return useQuery({
@@ -19,41 +21,30 @@ export function useEvent(eventId) {
 }
 
 export function useToggleEventLike(eventId) {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useOptimisticToggleMutation({
+    queryKey: eventKeys.detail(eventId),
     mutationFn: () => toggleEventLike(eventId),
-    onMutate: async () => {
-      // Cancel in-flight refetches so they don't overwrite the optimistic update
-      await queryClient.cancelQueries({ queryKey: eventKeys.detail(eventId) });
-
-      // Snapshot current state for rollback
-      const previous = queryClient.getQueryData(eventKeys.detail(eventId));
-
-      // Immediately flip the UI
-      queryClient.setQueryData(eventKeys.detail(eventId), (old) => {
-        if (!old) return old;
-        const liked = !old.likedByMe;
-        return {
-          ...old,
-          likedByMe: liked,
-          likeCount: liked ? old.likeCount + 1 : Math.max(0, old.likeCount - 1),
-        };
-      });
-
-      return { previous };
+    applyOptimistic: (old) => {
+      const liked = !old.likedByMe;
+      return {
+        ...old,
+        likedByMe: liked,
+        likeCount: liked ? old.likeCount + 1 : Math.max(0, old.likeCount - 1),
+      };
     },
-    onError: (_err, _vars, context) => {
-      // Revert to snapshot if API fails
-      if (context?.previous !== undefined) {
-        queryClient.setQueryData(eventKeys.detail(eventId), context.previous);
-      }
-    },
-    onSuccess: (data) => {
-      // Sync with server truth (corrects any count discrepancy)
-      queryClient.setQueryData(eventKeys.detail(eventId), (old) =>
-        old ? { ...old, likeCount: data.likeCount, likedByMe: data.liked } : old,
-      );
-    },
+    applyServerSync: (old, data) => ({ ...old, likeCount: data.likeCount, likedByMe: data.liked }),
+  });
+}
+
+export function useToggleEventSave(eventId) {
+  return useOptimisticToggleMutation({
+    queryKey: eventKeys.detail(eventId),
+    mutationFn: () => toggleEventSave(eventId),
+    applyOptimistic: (old) => ({ ...old, savedByMe: !old.savedByMe }),
+    applyServerSync: (old, data) => ({ ...old, savedByMe: data.saved }),
+    // The saved-list view is a separate collection — simplest to
+    // refetch it rather than reconcile an optimistic patch against it.
+    onSuccess: (_data, queryClient) => queryClient.invalidateQueries({ queryKey: eventKeys.saved() }),
   });
 }
 

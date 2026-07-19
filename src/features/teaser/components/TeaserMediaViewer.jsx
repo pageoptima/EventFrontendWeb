@@ -16,11 +16,9 @@ function TeaserMediaViewer({ media }) {
     try {
       await video.play();
     } catch {
-      // Browser blocks autoplay with sound until user interaction.
-      video.muted = true;
-      mutedRef.current = true;
-      setIsMuted(true);
-      video.play().catch(() => {});
+      // Autoplay with sound is blocked without a prior user gesture — leave
+      // sound on and stay paused. The next tap is a real user gesture, so
+      // the browser will allow it to play with sound.
     }
   }, []);
 

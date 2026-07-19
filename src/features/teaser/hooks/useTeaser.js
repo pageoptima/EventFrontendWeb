@@ -6,8 +6,10 @@ import {
   getTeaserLikes,
   deleteTeaser,
   changeTeaserVisibility,
+  toggleTeaserSave,
 } from "@/features/teaser/services/teaserService";
 import { teaserKeys } from "@/features/teaser/teaserQueryKeys";
+import { useOptimisticToggleMutation } from "@/shared/hooks/useOptimisticToggleMutation";
 
 export function useTeaser(teaserId) {
   return useQuery({
@@ -19,41 +21,30 @@ export function useTeaser(teaserId) {
 }
 
 export function useToggleTeaserLike(teaserId) {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useOptimisticToggleMutation({
+    queryKey: teaserKeys.detail(teaserId),
     mutationFn: () => toggleTeaserLike(teaserId),
-    onMutate: async () => {
-      // Cancel in-flight refetches so they don't overwrite the optimistic update
-      await queryClient.cancelQueries({ queryKey: teaserKeys.detail(teaserId) });
-
-      // Snapshot current state for rollback
-      const previous = queryClient.getQueryData(teaserKeys.detail(teaserId));
-
-      // Immediately flip the UI
-      queryClient.setQueryData(teaserKeys.detail(teaserId), (old) => {
-        if (!old) return old;
-        const liked = !old.likedByMe;
-        return {
-          ...old,
-          likedByMe: liked,
-          likeCount: liked ? old.likeCount + 1 : Math.max(0, old.likeCount - 1),
-        };
-      });
-
-      return { previous };
+    applyOptimistic: (old) => {
+      const liked = !old.likedByMe;
+      return {
+        ...old,
+        likedByMe: liked,
+        likeCount: liked ? old.likeCount + 1 : Math.max(0, old.likeCount - 1),
+      };
     },
-    onError: (_err, _vars, context) => {
-      // Revert to snapshot if API fails
-      if (context?.previous !== undefined) {
-        queryClient.setQueryData(teaserKeys.detail(teaserId), context.previous);
-      }
-    },
-    onSuccess: (data) => {
-      // Sync with server truth (corrects any count discrepancy)
-      queryClient.setQueryData(teaserKeys.detail(teaserId), (old) =>
-        old ? { ...old, likeCount: data.likeCount, likedByMe: data.liked } : old,
-      );
-    },
+    applyServerSync: (old, data) => ({ ...old, likeCount: data.likeCount, likedByMe: data.liked }),
+  });
+}
+
+export function useToggleTeaserSave(teaserId) {
+  return useOptimisticToggleMutation({
+    queryKey: teaserKeys.detail(teaserId),
+    mutationFn: () => toggleTeaserSave(teaserId),
+    applyOptimistic: (old) => ({ ...old, savedByMe: !old.savedByMe }),
+    applyServerSync: (old, data) => ({ ...old, savedByMe: data.saved }),
+    // The saved-list view is a separate collection — simplest to
+    // refetch it rather than reconcile an optimistic patch against it.
+    onSuccess: (_data, queryClient) => queryClient.invalidateQueries({ queryKey: teaserKeys.saved() }),
   });
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle } from "lucide-react";
-import { useTeaser, useToggleTeaserLike } from "@/features/teaser/hooks/useTeaser";
+import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Bookmark } from "lucide-react";
+import { useTeaser, useToggleTeaserLike, useToggleTeaserSave } from "@/features/teaser/hooks/useTeaser";
 import {
   useTeaserComments,
   useCreateTeaserComment,
@@ -42,7 +42,7 @@ function AuthorRow({ author, teaserId, currentVisibility, isOwn, className = "" 
   );
 }
 
-function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes }) {
+function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -67,6 +67,17 @@ function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes }) {
         <MessageCircle className="h-5 w-5" />
         {teaser.commentCount ?? 0}
       </span>
+      <button
+        type="button"
+        onClick={onToggleSave}
+        disabled={isSavePending}
+        aria-label={teaser.savedByMe ? "Unsave teaser" : "Save teaser"}
+        className="ml-auto flex items-center gap-1.5 text-sm font-medium text-foreground"
+      >
+        <Bookmark
+          className={`h-5 w-5 transition ${teaser.savedByMe ? "fill-foreground" : ""}`}
+        />
+      </button>
     </div>
   );
 }
@@ -83,6 +94,7 @@ function TeaserDetailPage() {
 
   const { data: teaser, isLoading, error } = useTeaser(teaserId);
   const toggleLike = useToggleTeaserLike(teaserId);
+  const toggleSave = useToggleTeaserSave(teaserId);
 
   const {
     data: commentsData,
@@ -225,6 +237,8 @@ function TeaserDetailPage() {
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
+              onToggleSave={() => toggleSave.mutate()}
+              isSavePending={toggleSave.isPending}
             />
           </div>
         </div>
@@ -302,6 +316,8 @@ function TeaserDetailPage() {
               onToggleLike={() => toggleLike.mutate()}
               isPending={toggleLike.isPending}
               onShowLikes={() => setShowLikes(true)}
+              onToggleSave={() => toggleSave.mutate()}
+              isSavePending={toggleSave.isPending}
             />
           </div>
 
