@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Calendar, MapPin, Radio, Bookmark } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Calendar, MapPin, Radio, Bookmark, Share2, Check } from "lucide-react";
 import { useEvent, useToggleEventLike, useToggleEventSave } from "@/features/event/hooks/useEvent";
 import { useCountdown } from "@/features/event/hooks/useCountdown";
 import { useEventComments, useCreateComment, useToggleCommentLike } from "@/features/event/hooks/useEventComments";
@@ -10,6 +10,7 @@ import EventOptionsMenu from "@/features/event/components/EventOptionsMenu";
 import EventLikesModal from "@/features/event/components/EventLikesModal";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useShare } from "@/shared/hooks/useShare";
 
 const DESKTOP_SIDEBAR_WIDTH = 380;
 
@@ -156,7 +157,7 @@ function AuthorRow({ author, eventId, currentVisibility, isOwn, className = "" }
   );
 }
 
-function ActionsBar({ event, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending }) {
+function ActionsBar({ event, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending, onShare, justCopiedLink }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -181,6 +182,18 @@ function ActionsBar({ event, onToggleLike, isPending, onShowLikes, onToggleSave,
         <MessageCircle className="h-5 w-5" />
         {event.commentCount ?? 0}
       </span>
+      <button
+        type="button"
+        onClick={onShare}
+        aria-label={justCopiedLink ? "Link copied" : "Share event"}
+        className="flex items-center gap-1.5 text-sm font-medium text-foreground"
+      >
+        {justCopiedLink ? (
+          <Check className="h-5 w-5 text-green-500" />
+        ) : (
+          <Share2 className="h-5 w-5" />
+        )}
+      </button>
       <button
         type="button"
         onClick={onToggleSave}
@@ -210,6 +223,7 @@ function EventDetailPage() {
   const { data: event, isLoading, error } = useEvent(eventId);
   const toggleLike = useToggleEventLike(eventId);
   const toggleSave = useToggleEventSave(eventId);
+  const { share, copied: justCopiedLink } = useShare();
 
   const {
     data: commentsData,
@@ -255,6 +269,14 @@ function EventDetailPage() {
   function handleReply(comment) {
     setReplyTo({ id: comment.id, name: comment.user?.name });
     commentInputRef.current?.focus();
+  }
+
+  function handleShare() {
+    share({
+      title: event.author?.name ? `${event.author.name} on Event` : "Event",
+      text: event.caption ?? "",
+      url: `${window.location.origin}/events/${eventId}`,
+    });
   }
 
   if (isLoading) {
@@ -368,6 +390,8 @@ function EventDetailPage() {
               onShowLikes={() => setShowLikes(true)}
               onToggleSave={() => toggleSave.mutate()}
               isSavePending={toggleSave.isPending}
+              onShare={handleShare}
+              justCopiedLink={justCopiedLink}
             />
           </div>
         </div>
@@ -450,6 +474,8 @@ function EventDetailPage() {
               onShowLikes={() => setShowLikes(true)}
               onToggleSave={() => toggleSave.mutate()}
               isSavePending={toggleSave.isPending}
+              onShare={handleShare}
+              justCopiedLink={justCopiedLink}
             />
           </div>
 

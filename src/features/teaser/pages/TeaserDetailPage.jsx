@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Bookmark } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Send, Loader2, AlertCircle, Bookmark, Share2, Check } from "lucide-react";
 import { useTeaser, useToggleTeaserLike, useToggleTeaserSave } from "@/features/teaser/hooks/useTeaser";
 import {
   useTeaserComments,
@@ -13,6 +13,7 @@ import TeaserOptionsMenu from "@/features/teaser/components/TeaserOptionsMenu";
 import TeaserLikesModal from "@/features/teaser/components/TeaserLikesModal";
 import UserAvatar from "@/shared/components/common/UserAvatar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useShare } from "@/shared/hooks/useShare";
 
 const DESKTOP_SIDEBAR_WIDTH = 380;
 
@@ -42,7 +43,7 @@ function AuthorRow({ author, teaserId, currentVisibility, isOwn, className = "" 
   );
 }
 
-function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending }) {
+function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes, onToggleSave, isSavePending, onShare, justCopiedLink }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3">
       <button
@@ -67,6 +68,18 @@ function ActionsBar({ teaser, onToggleLike, isPending, onShowLikes, onToggleSave
         <MessageCircle className="h-5 w-5" />
         {teaser.commentCount ?? 0}
       </span>
+      <button
+        type="button"
+        onClick={onShare}
+        aria-label={justCopiedLink ? "Link copied" : "Share teaser"}
+        className="flex items-center gap-1.5 text-sm font-medium text-foreground"
+      >
+        {justCopiedLink ? (
+          <Check className="h-5 w-5 text-green-500" />
+        ) : (
+          <Share2 className="h-5 w-5" />
+        )}
+      </button>
       <button
         type="button"
         onClick={onToggleSave}
@@ -95,6 +108,7 @@ function TeaserDetailPage() {
   const { data: teaser, isLoading, error } = useTeaser(teaserId);
   const toggleLike = useToggleTeaserLike(teaserId);
   const toggleSave = useToggleTeaserSave(teaserId);
+  const { share, copied: justCopiedLink } = useShare();
 
   const {
     data: commentsData,
@@ -132,6 +146,14 @@ function TeaserDetailPage() {
   function handleReply(comment) {
     setReplyTo({ id: comment.id, name: comment.user?.name });
     commentInputRef.current?.focus();
+  }
+
+  function handleShare() {
+    share({
+      title: teaser.author?.name ? `${teaser.author.name} on Teaser` : "Teaser",
+      text: teaser.caption ?? "",
+      url: `${window.location.origin}/teasers/${teaserId}`,
+    });
   }
 
   if (isLoading) {
@@ -239,6 +261,8 @@ function TeaserDetailPage() {
               onShowLikes={() => setShowLikes(true)}
               onToggleSave={() => toggleSave.mutate()}
               isSavePending={toggleSave.isPending}
+              onShare={handleShare}
+              justCopiedLink={justCopiedLink}
             />
           </div>
         </div>
@@ -318,6 +342,8 @@ function TeaserDetailPage() {
               onShowLikes={() => setShowLikes(true)}
               onToggleSave={() => toggleSave.mutate()}
               isSavePending={toggleSave.isPending}
+              onShare={handleShare}
+              justCopiedLink={justCopiedLink}
             />
           </div>
 
