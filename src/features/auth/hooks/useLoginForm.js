@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import { setCredentials } from "@/stores/slices/authSlice";
 import { login } from "@/features/auth/services/authService";
 import { VALIDATION } from "@/shared/utils/constants";
@@ -23,6 +24,8 @@ function validate({ identifier, password }) {
 
 export function useLoginForm() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [fields, setFields] = useState(INITIAL_FIELDS);
   const [fieldErrors, setFieldErrors] = useState(INITIAL_ERRORS);
 
@@ -30,6 +33,10 @@ export function useLoginForm() {
     mutationFn: login,
     onSuccess: ({ accessToken }) => {
       dispatch(setCredentials({ accessToken, user: decodeJwt(accessToken) }));
+      // Return to the page that triggered the login redirect (e.g. a shared
+      // event/teaser link), falling back to home.
+      const from = location.state?.from;
+      navigate(from ? `${from.pathname}${from.search}` : "/", { replace: true });
     },
   });
 

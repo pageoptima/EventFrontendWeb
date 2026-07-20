@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import AuthFormField from "@/features/auth/components/AuthFormField";
 import AuthFormError from "@/features/auth/components/AuthFormError";
@@ -8,6 +8,7 @@ import { useLoginForm } from "@/features/auth/hooks/useLoginForm";
 function LoginPage() {
   const { fields, fieldErrors, apiError, isLoading, handleChange, handleSubmit } =
     useLoginForm();
+  const location = useLocation();
 
   return (
     <div className="space-y-6">
@@ -66,6 +67,7 @@ function LoginPage() {
         Don&apos;t have an account?{" "}
         <Link
           to="/auth/register"
+          state={location.state}
           className="font-semibold text-[#B839F1] dark:text-[#7F5AF0] transition hover:text-[#FF2727] dark:hover:text-[#2CB8E8]"
         >
           Create one
